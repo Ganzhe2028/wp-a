@@ -47,3 +47,8 @@ model LocationCard {
   seat      String
   updatedAt DateTime @updatedAt
 }
+
+model SystemSetting {
+  key   String @id
+  value String
+}

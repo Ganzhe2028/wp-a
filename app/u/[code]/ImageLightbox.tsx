@@ -59,8 +59,10 @@ export default function ImageLightbox({
   const current = images[currentIndex]
 
   return (
-    <button
-      type="button"
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="图片预览"
       className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
       onClick={onClose}
     >
@@ -119,6 +121,6 @@ export default function ImageLightbox({
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-sm font-medium">
         {currentIndex + 1} / {images.length}
       </div>
-    </button>
+    </div>
   )
 }

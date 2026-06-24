@@ -35,6 +35,20 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json();
   const { englishName, chineseName, grade, bio, avatarUrl, published } = body;
 
+  // Block publish control if admin hasn't enabled it
+  if (published !== undefined) {
+    const setting = await prisma.systemSetting.findUnique({
+      where: { key: "allowStudentPublishControl" },
+      select: { value: true },
+    });
+    if (setting?.value !== "true") {
+      return NextResponse.json(
+        { error: "Publish control is not available" },
+        { status: 403 }
+      );
+    }
+  }
+
   if (bio !== undefined) {
     const codePoints = [...bio].length;
     if (codePoints > 80) {

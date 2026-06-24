@@ -40,6 +40,7 @@ export default function EditPage() {
     text: string;
   } | null>(null);
   const [dirty, setDirty] = useState(false);
+  const [allowPublishControl, setAllowPublishControl] = useState(false);
 
   const bioCodePoints = [...(form.bio || "")].length;
   const bioOverLimit = bioCodePoints > 80;
@@ -77,6 +78,19 @@ export default function EditPage() {
         setLoading(false);
       });
   }, [token]);
+
+  // ── Fetch system settings ──
+
+  useEffect(() => {
+    fetch("/api/settings?key=allowStudentPublishControl")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.value === "true") {
+          setAllowPublishControl(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const updateField = useCallback(
     <K extends keyof PersonData>(field: K, value: PersonData[K]) => {
@@ -306,6 +320,7 @@ export default function EditPage() {
             onImagesChange={setImages}
           />
 
+          {allowPublishControl && (
           <div className="flex items-center justify-between rounded-xl bg-stone-50 p-4">
             <div>
               <p className="text-sm font-medium text-stone-900">Published</p>
@@ -332,6 +347,7 @@ export default function EditPage() {
               />
             </button>
           </div>
+          )}
         </div>
 
         {/* Save button */}

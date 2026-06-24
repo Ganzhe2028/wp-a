@@ -39,13 +39,14 @@ interface ExportRow {
   edit: string;
 }
 
-type TabId = "import" | "location" | "takedown" | "export";
+type TabId = "import" | "location" | "takedown" | "export" | "settings";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "import", label: "导入名单" },
   { id: "location", label: "位置编辑" },
   { id: "takedown", label: "下架控制" },
   { id: "export", label: "导出" },
+  { id: "settings", label: "系统设置" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -205,6 +206,7 @@ function Dashboard({ tab, onTabChange }: { tab: TabId; onTabChange: (t: TabId) =
         {tab === "location" && <LocationSection />}
         {tab === "takedown" && <TakedownSection />}
         {tab === "export" && <ExportSection />}
+        {tab === "settings" && <SettingsSection />}
       </main>
     </div>
   );
@@ -701,6 +703,102 @@ function ExportSection() {
             </tbody>
           </table>
         </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  System Settings                                                    */
+/* ------------------------------------------------------------------ */
+
+function SettingsSection() {
+  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((data) => setSettings(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const allowPublish = settings["allowStudentPublishControl"] === "true";
+
+  async function toggleSetting(key: string, value: string) {
+    setSaving(key);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, value }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setFeedback({ ok: false, msg: data.error ?? "保存失败" });
+      } else {
+        setSettings((prev) => ({ ...prev, [key]: value }));
+        setFeedback({ ok: true, msg: "设置已保存" });
+        setTimeout(() => setFeedback(null), 2000);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "网络错误";
+      setFeedback({ ok: false, msg: message });
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  if (loading) {
+    return <p className="text-sm text-zinc-500">加载中…</p>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">系统设置</h2>
+
+      <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+              允许学生自主发布
+            </p>
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              开启后，学生在编辑页面会看到发布开关，可以自行控制主页是否公开。关闭后只有管理员可以发布主页。
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={allowPublish}
+            disabled={saving === "allowStudentPublishControl"}
+            onClick={() =>
+              toggleSetting(
+                "allowStudentPublishControl",
+                allowPublish ? "false" : "true"
+              )
+            }
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-zinc-500/20 focus:ring-offset-2 ${
+              allowPublish ? "bg-zinc-900 dark:bg-zinc-100" : "bg-zinc-300 dark:bg-zinc-600"
+            } ${saving === "allowStudentPublishControl" ? "cursor-not-allowed opacity-50" : ""}`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                allowPublish ? "translate-x-5" : "translate-x-0"
+              } ${allowPublish ? "" : "dark:bg-zinc-400"}`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {feedback && (
+        <p className={`text-sm ${feedback.ok ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>
+          {feedback.msg}
+        </p>
       )}
     </div>
   );
