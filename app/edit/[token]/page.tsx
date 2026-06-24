@@ -116,6 +116,7 @@ export default function EditPage() {
           chineseName: form.chineseName || null,
           grade: form.grade || null,
           bio: form.bio || null,
+          avatarUrl: form.avatarUrl || null,
           published: form.published,
         }),
       });

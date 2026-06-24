@@ -10,7 +10,7 @@
 
 | 层 | 选型 |
 |---|---|
-| 框架 | Next.js 15 (App Router) + React + TypeScript |
+| 框架 | Next.js 16 (App Router) + React + TypeScript |
 | 数据库 | PostgreSQL (Neon Serverless)，Prisma ORM |
 | 图片存储 | Cloudflare R2（S3 兼容，presigned URL 直传） |
 | 图片压缩 | browser-image-compression（浏览器端） |
@@ -95,26 +95,38 @@ npm run dev               # 启动开发服务器 → http://localhost:3000
 
 ```
 app/
-  u/[code]/page.tsx          # 公开主页（SSR）
-  loc/[code]/page.tsx        # 位置页（SSR）
-  edit/[token]/page.tsx      # 编辑页（客户端）
-  me/collection/page.tsx     # 本地收藏（客户端，localStorage）
+  u/[code]/
+    page.tsx                 # 公开主页（SSR）
+    ImageLightbox.tsx         # 全屏灯箱（客户端）
+    ImageGallery.tsx          # 图片网格 + 灯箱触发（客户端）
+  loc/[code]/
+    page.tsx                 # 位置页（SSR）
+    FavoriteButton.tsx        # 收藏按钮（客户端，localStorage）
+  edit/[token]/page.tsx      # 编辑页（客户端，含头像+图片上传）
+  me/collection/page.tsx     # 本地收藏列表（客户端，localStorage）
   admin/page.tsx             # 运营后台（口令登录）
   api/
-    me/route.ts              # 获取/更新自己数据
-    me/images/route.ts       # 图片记录增删
-    upload-url/route.ts      # R2 presigned PUT URL
-    admin/login/route.ts
-    admin/import/route.ts    # 批量导入名单
-    admin/location/route.ts  # 编辑位置页
-    admin/takedown/route.ts  # 下架开关
-    admin/export/route.ts    # 导出链接表
+    me/route.ts              # GET / PATCH 自己数据
+    me/images/route.ts       # POST 保存 / DELETE 删除图片记录
+    upload-url/route.ts      # POST 获取 R2 presigned PUT URL
+    admin/login/route.ts     # POST 口令登录
+    admin/import/route.ts    # POST 批量导入名单
+    admin/location/route.ts  # POST 编辑位置页
+    admin/takedown/route.ts  # POST 下架开关
+    admin/export/route.ts    # GET 导出 CSV 链接表
+    admin/persons/route.ts   # GET 所有人列表（下架面板用）
+components/
+  AvatarUploader.tsx          # 头像上传（压缩 + presigned 直传）
+  ImageGrid.tsx               # 多图上传网格（最多 4 张，含删除）
 lib/
   prisma.ts                  # Prisma client 单例
-  r2.ts                      # R2 S3 client + presign
-  auth.ts                    # token 校验 / admin session
-  code.ts                    # 短码生成
-prisma/schema.prisma
+  r2.ts                      # R2 S3 client + presigned URL（懒加载）
+  auth.ts                    # editToken 校验 / admin JWT session
+  code.ts                    # nanoid 短码 + 编辑 token 生成
+  qr.ts                      # 二维码生成（SVG / DataURL）
+prisma/
+  schema.prisma              # 数据模型（Person / Image / LocationCard）
+  migrations/                # 数据库迁移文件
 ```
 
 ## 核心设计决策
