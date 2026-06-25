@@ -36,7 +36,7 @@ export async function PATCH(request: NextRequest) {
   const { englishName, chineseName, grade, bio, avatarUrl, published } = body;
 
   // Block publish control if admin hasn't enabled it
-  if (published !== undefined) {
+  if (published === true) {
     const setting = await prisma.systemSetting.findUnique({
       where: { key: "allowStudentPublishControl" },
       select: { value: true },
