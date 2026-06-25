@@ -11,22 +11,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "key required" }, { status: 400 });
   }
 
-  try {
-    // quick connectivity check first
-    await prisma.$queryRaw`SELECT 1`;
+  const setting = await prisma.systemSetting.findUnique({
+    where: { key },
+    select: { value: true },
+  });
 
-    const setting = await prisma.systemSetting.findUnique({
-      where: { key },
-      select: { value: true },
-    });
-
-    return NextResponse.json({ value: setting?.value ?? null });
-  } catch (e: any) {
-    return NextResponse.json({
-      error: "db_error",
-      message: e.message,
-      code: e.code,
-      meta: e.meta,
-    }, { status: 500 });
-  }
+  return NextResponse.json({ value: setting?.value ?? null });
 }
