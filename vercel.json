@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "app/api/**/*.ts": {
+      "includeFiles": "app/generated/prisma/libquery_engine-rhel-openssl-3.0.x.so.node"
+    },
+    "app/u/**/page.tsx": {
+      "includeFiles": "app/generated/prisma/libquery_engine-rhel-openssl-3.0.x.so.node"
+    },
+    "app/loc/**/page.tsx": {
+      "includeFiles": "app/generated/prisma/libquery_engine-rhel-openssl-3.0.x.so.node"
+    },
+    "app/edit/**/page.tsx": {
+      "includeFiles": "app/generated/prisma/libquery_engine-rhel-openssl-3.0.x.so.node"
+    }
+  }
+}
