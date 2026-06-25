@@ -39,13 +39,14 @@ interface ExportRow {
   edit: string;
 }
 
-type TabId = "import" | "location" | "takedown" | "export" | "settings";
+type TabId = "import" | "location" | "takedown" | "export" | "qr" | "settings";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "import", label: "导入名单" },
   { id: "location", label: "位置编辑" },
   { id: "takedown", label: "下架控制" },
   { id: "export", label: "导出" },
+  { id: "qr", label: "QR 码" },
   { id: "settings", label: "系统设置" },
 ];
 
@@ -206,6 +207,7 @@ function Dashboard({ tab, onTabChange }: { tab: TabId; onTabChange: (t: TabId) =
         {tab === "location" && <LocationSection />}
         {tab === "takedown" && <TakedownSection />}
         {tab === "export" && <ExportSection />}
+        {tab === "qr" && <QRSection />}
         {tab === "settings" && <SettingsSection />}
       </main>
     </div>
@@ -697,6 +699,86 @@ function ExportSection() {
                   </td>
                   <td className="px-3 py-2">
                     <CopyButton value={r.edit} label="复制" />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  QR Codes                                                           */
+/* ------------------------------------------------------------------ */
+
+function QRSection() {
+  const [persons, setPersons] = useState<Person[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/persons")
+      .then((r) => r.json())
+      .then((data) => setPersons(data.persons ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const total = persons.length * 2;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">QR 码生成</h2>
+        <button
+          type="button"
+          onClick={() => window.open("/api/admin/qr/print", "_blank")}
+          disabled={persons.length === 0}
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          打开打印页 ({total} 张)
+        </button>
+      </div>
+
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        每人生成 2 张 QR 码：主页 QR（/u/码）和位置页 QR（/loc/码）。点击按钮在新窗口打开打印页，自动弹出打印对话框。建议用 A4 纸打印后裁剪。
+      </p>
+
+      {loading && <p className="text-sm text-zinc-500">加载中…</p>}
+
+      {!loading && persons.length === 0 && (
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">暂无人员数据，请先在「导入名单」中导入。</p>
+      )}
+
+      {persons.length > 0 && (
+        <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-zinc-100 dark:bg-zinc-800">
+              <tr>
+                <th className="px-3 py-2 font-medium text-zinc-600 dark:text-zinc-400">#</th>
+                <th className="px-3 py-2 font-medium text-zinc-600 dark:text-zinc-400">姓名</th>
+                <th className="px-3 py-2 font-medium text-zinc-600 dark:text-zinc-400">短码</th>
+                <th className="px-3 py-2 font-medium text-zinc-600 dark:text-zinc-400">已发布</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {persons.map((p, i) => (
+                <tr key={p.id} className="bg-white dark:bg-zinc-900">
+                  <td className="px-3 py-2 text-zinc-400">{i + 1}</td>
+                  <td className="px-3 py-2 text-zinc-900 dark:text-zinc-100">
+                    {p.chineseName ?? "\u2014"}
+                  </td>
+                  <td className="px-3 py-2 font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                    {p.code}
+                  </td>
+                  <td className="px-3 py-2">
+                    {p.published ? (
+                      <span className="text-emerald-600 dark:text-emerald-400 text-xs">是</span>
+                    ) : (
+                      <span className="text-zinc-400 text-xs">否</span>
+                    )}
                   </td>
                 </tr>
               ))}
