@@ -184,3 +184,7 @@ Three independent requirements for Prisma to work on Vercel serverless:
 
 ### @types/qrcode install
 - First `npm install -D @types/qrcode` can fail silently (package not found). Verify with `ls node_modules/@types/qrcode` after install.
+
+### Prisma engine noise on Vercel (2026-06-25)
+- After deployment, Vercel logs show 4 `PrismaClientInitializationError` "cannot open shared object file" errors. These are **expected noise**, not bugs. The generated `client.ts` tries 4 paths to load the engine binary: 2 for darwin (`.dylib.node`, fails on Linux) and 2 for rhel (`.so.node` via `__dirname` + `process.cwd()`). The `process.cwd()` fallback for the rhel binary succeeds — the app works. The errors are just the failed attempts before the successful one.
+- If the app does NOT work (actual DB query failures), add `PRISMA_QUERY_ENGINE_LIBRARY=./app/generated/prisma/libquery_engine-rhel-openssl-3.0.x.so.node` to Vercel env vars to bypass path resolution entirely.

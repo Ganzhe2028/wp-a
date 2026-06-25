@@ -88,6 +88,37 @@ function parseExportCsv(text: string) {
 /*  Copy Button                                                        */
 /* ------------------------------------------------------------------ */
 
+function OpenLink({ href }: { href: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center rounded bg-zinc-100 px-1.5 py-1 text-zinc-600 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+      title="打开"
+    >
+      <span className="sr-only">打开链接</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="13"
+        height="13"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <title>打开链接</title>
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+    </a>
+  );
+}
+
 function CopyButton({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -692,13 +723,22 @@ function ExportSection() {
                   <td className="px-3 py-2 text-zinc-900 dark:text-zinc-100">{r.chineseName}</td>
                   <td className="px-3 py-2 text-zinc-500 dark:text-zinc-400">{r.englishName}</td>
                   <td className="px-3 py-2">
-                    <CopyButton value={r.homepage} label="复制" />
+                    <span className="inline-flex items-center gap-1">
+                      <CopyButton value={r.homepage} label="复制" />
+                      <OpenLink href={r.homepage} />
+                    </span>
                   </td>
                   <td className="px-3 py-2">
-                    <CopyButton value={r.location} label="复制" />
+                    <span className="inline-flex items-center gap-1">
+                      <CopyButton value={r.location} label="复制" />
+                      <OpenLink href={r.location} />
+                    </span>
                   </td>
                   <td className="px-3 py-2">
-                    <CopyButton value={r.edit} label="复制" />
+                    <span className="inline-flex items-center gap-1">
+                      <CopyButton value={r.edit} label="复制" />
+                      <OpenLink href={r.edit} />
+                    </span>
                   </td>
                 </tr>
               ))}
