@@ -11,7 +11,7 @@
 | 层 | 选型 |
 |---|---|
 | 框架 | Next.js 16 (App Router) + React + TypeScript |
-| 数据库 | PostgreSQL (Neon Serverless)，Prisma ORM |
+| 数据库 | PostgreSQL (Neon Serverless)，Prisma ORM v6 |
 | 图片存储 | Cloudflare R2（S3 兼容，presigned URL 直传） |
 | 图片压缩 | browser-image-compression（浏览器端） |
 | 短码/Token | nanoid |
@@ -59,12 +59,14 @@ R2_BUCKET=
 R2_PUBLIC_BASE_URL=     # R2 公开访问域名
 ADMIN_PASSWORD=         # 运营后台口令
 APP_BASE_URL=           # 如 https://xxx.top，导出链接拼前缀用
+PRISMA_QUERY_ENGINE_LIBRARY=  # Vercel 部署需设，指向引擎 .node 文件（可选但推荐）
 ```
 
 ### 安装与运行
 
 ```bash
 npm install
+npx prisma generate       # 生成本平台 Prisma 客户端（已提交预生成版本）
 npx prisma migrate dev    # 建表
 npm run dev               # 启动开发服务器 → http://localhost:3000
 ```
@@ -75,8 +77,14 @@ npm run dev               # 启动开发服务器 → http://localhost:3000
 2. Neon 建库 → 拿到两个连接串
 3. Cloudflare R2 建桶 → 开公开访问 + 配 CORS → 拿到 S3 密钥
 4. Vercel 连仓 → 填环境变量 → 部署
-5. 域名 DNS 走 Cloudflare 指向 Vercel → HTTPS 自动
-6. 真机在校园网实测 `/u/{code}` 和 `/loc/{code}` 打开速度
+
+生产地址：`https://oweek26.vercel.app`
+
+⚠️ Vercel 部署特别注意：
+- `binaryTargets` 必须包含 `"rhel-openssl-3.0.x"`（Vercel 用的是 Amazon Linux，不是 Debian）
+- `dotenv` 必须在 `dependencies` 里（不在 `devDependencies`），否则 Vercel 生产构建时 `prisma.config.ts` 会找不到 `dotenv/config`
+- 生成的 Prisma 客户端（`app/generated/prisma/`）**必须提交到 git**——Next.js 的 output file tracing 不会自动追踪 `.node` 引擎二进制文件
+- 没有 `postinstall` 脚本——提交的生成文件已经包含正确引擎二进制
 
 ## 系统架构
 
@@ -133,6 +141,8 @@ app/
     admin/takedown/route.ts  # POST 下架开关
     admin/export/route.ts    # GET 导出 CSV 链接表
     admin/persons/route.ts   # GET 所有人列表（下架面板用）
+    admin/settings/route.ts  # GET/PATCH 系统设置
+    settings/route.ts        # GET 公开读单个设置
 components/
   AvatarUploader.tsx          # 头像上传（压缩 + presigned 直传）
   ImageGrid.tsx               # 多图上传网格（最多 4 张，含删除）
@@ -143,8 +153,9 @@ lib/
   code.ts                    # nanoid 短码 + 编辑 token 生成
   qr.ts                      # 二维码生成（SVG / DataURL）
 prisma/
-  schema.prisma              # 数据模型（Person / Image / LocationCard）
+  schema.prisma              # 数据模型（Person / Image / LocationCard / SystemSetting）
   migrations/                # 数据库迁移文件
+app/generated/prisma/        # Prisma 生成客户端（含引擎二进制，已提交 git）
 ```
 
 ## 核心设计决策
@@ -161,6 +172,7 @@ prisma/
 | 检查项 | 命令/方法 |
 |---|---|
 | 数据库连通 | `npx prisma db push --dry-run` |
+| Prisma 客户端 | `npx prisma generate`（新 clone 后必须跑一次） |
 | 类型检查 | `npx tsc --noEmit` |
 | 构建 | `npm run build` |
 | 生产启动 | `npm start` |
@@ -177,3 +189,7 @@ prisma/
 - [开发文档 – 接口契约与构建顺序](docs/02_开发文档_OWeek个人主页系统_v1.0.md)
 - [操作手册 – 新人接手指南](docs/03_操作手册.md)
 - [AGENTS.md](AGENTS.md) – coding agent 工作规范
+
+## 线上
+
+生产环境：**[oweek26.vercel.app](https://oweek26.vercel.app)**（Vercel，`main` 分支 push 自动部署）

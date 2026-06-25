@@ -68,12 +68,15 @@ prisma/schema.prisma
 ## 4. 数据模型(prisma/schema.prisma)
 
 ```prisma
-generator client { provider = "prisma-client-js" }
+generator client {
+  provider      = "prisma-client"
+  output        = "../app/generated/prisma"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Person {
@@ -218,27 +221,27 @@ GET /api/settings?key=...
 
 ## 11. 部署步骤(按序)
 
-1. GitHub 建仓,Next 脚手架推上去。
-2. Neon 建库,拿 pooled 和 direct 两个连接串。
-3. 配 .env,prisma migrate 建表。
-4. Cloudflare R2 建桶,开公开访问(自定义域或 r2.dev),拿 access key,配 CORS 允许 PUT。
-5. Vercel 连仓,填全部环境变量,部署。
+1. ✅ GitHub 建仓,Next 脚手架推上去。
+2. ✅ Neon 建库,拿 pooled 和 direct 两个连接串。
+3. ✅ 配 .env,prisma migrate 建表。
+4. ✅ Cloudflare R2 建桶,开公开访问(自定义域或 r2.dev),拿 access key,配 CORS 允许 PUT。
+5. ✅ Vercel 连仓,填全部环境变量,部署。生产: `https://oweek26.vercel.app`
 6. .top 域名解析走 Cloudflare,指向 Vercel,HTTPS 自动。
 7. 校园网 + 手机真机实测 /u 和 /loc 打开速度。慢或不稳就启用学校域名服务器方案。
 8. 运营导入名单,出链接表,写 300 张标签 + 印二维码,逐张验证。
 
 ## 12. 构建顺序与验收(coding agent 按此推进)
 
-1. 脚手架 + Prisma + Neon 连通。验收:migrate 成功,能连库查询。
-2. 数据模型 + admin 导入 + 导出。验收:导入 3 条假数据,导出表里每人有 4 类链接。
-3. /u/[code] 主页渲染。验收:打开某 code 看到字段;不存在或 hidden 显示占位。
-4. /edit/[token] 文字编辑(先不做图片)。验收:改 bio 保存后 /u 同步;bio 超 80 被挡;无头像不能发布。
-5. 图片全链路:upload-url + R2 直传 + 保存 + 展示 + 删除 + 4 张上限。验收:传 4 张正常,第 5 张被挡;删除后 R2 和库都清掉;/u 显示 1:1 缩略,点开全屏。
-6. /loc/[code] + admin 位置编辑。验收:运营填房间座位后 /loc 正确显示。
-7. 收藏 + /me/collection。验收:收藏后收藏页出现,刷新还在,链接跳回位置页。
-8. admin 登录保护 + 下架开关。验收:无 cookie 进不了 admin;下架后 /u 或某图隐藏。
-9. 二维码批量生成。验收:按 code 生成的码扫出来是对的 URL。
-10. 部署 + 真机端到端。验收:真机碰和扫两类标签都跳对页。
+1. ✅ 脚手架 + Prisma + Neon 连通。
+2. ✅ 数据模型 + admin 导入 + 导出。
+3. ✅ /u/[code] 主页渲染。
+4. ✅ /edit/[token] 文字编辑。
+5. ✅ 图片全链路。
+6. ✅ /loc/[code] + admin 位置编辑。
+7. ✅ 收藏 + /me/collection。
+8. ✅ admin 登录保护 + 下架开关。
+9. ✅ 二维码批量生成。
+10. 🔧 部署 + 真机端到端（已部署到 Vercel,待域名 + 真机实测）。
 
 ## 13. 不做(v1.0 明确排除)
 

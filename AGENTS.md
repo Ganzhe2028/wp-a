@@ -120,7 +120,10 @@ Follow the 10-step sequence in section 12 of the dev doc. Each step has explicit
 ## What NOT to build (v1.0 exclusions)
 Server accounts, login/registration, comments, likes, social links, pairing algorithms, notifications, server-side favorites. None of these.
 
-## Pitfalls (from development session 2026-06-24)
+## Deployed URL
+Production: `https://oweek26.vercel.app` (Vercel, auto-deploys from `main` branch).
+
+## Pitfalls
 
 ### Prisma v6 config structure
 - `prisma.config.ts` is separate from `schema.prisma` — both must be updated.
@@ -128,6 +131,20 @@ Server accounts, login/registration, comments, likes, social links, pairing algo
 - Generator output is `../app/generated/prisma` — import from `@/app/generated/prisma/client`.
 - `directUrl` goes in `prisma.config.ts`, not in `schema.prisma`.
 - `prisma db execute` in v6 needs explicit `--url` flag.
+
+### Vercel deployment: Prisma engine binary (2026-06-25)
+Three independent requirements for Prisma to work on Vercel serverless:
+
+1. **binaryTargets must include `rhel-openssl-3.0.x`** — Vercel runs on Amazon Linux 2023, not Debian. In `schema.prisma` generator block:
+   ```
+   binaryTargets = ["native", "rhel-openssl-3.0.x"]
+   ```
+
+2. **Commit generated Prisma client to git** — Next.js output file tracing does not include the `.node` engine binary when output is at `app/generated/prisma/`. The only reliable fix: remove `/app/generated/prisma` from `.gitignore` and `.vercelignore`, commit the generated files (including both `libquery_engine-darwin-arm64.dylib.node` and `libquery_engine-rhel-openssl-3.0.x.so.node`). Vercel deploys them as regular source files, and Prisma finds the engine at runtime.
+
+3. **`dotenv` must be in `dependencies`** (not `devDependencies`) — `prisma.config.ts` imports `dotenv/config`. On Vercel with `NODE_ENV=production`, `npm install` skips `devDependencies`, so `dotenv` would be missing and `prisma generate` would crash during `postinstall`. Since generated files are committed, `postinstall` is removed.
+
+4. **No `postinstall` script** — The generated client is committed directly. Adding `postinstall: "prisma generate"` would fail on Vercel without `dotenv` in `dependencies`, and is unnecessary since the committed files already contain the correct engine binary.
 
 ### create-next-app conflicts
 - If AGENTS.md or README.md already exist, `create-next-app` refuses to scaffold. Move them to /tmp first, scaffold, then move back.
