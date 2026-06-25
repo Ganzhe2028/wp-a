@@ -717,29 +717,48 @@ function ExportSection() {
 function QRSection() {
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/persons")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("会话过期，请刷新页面重新登录");
+        return r.json();
+      })
       .then((data) => setPersons(data.persons ?? []))
-      .catch(() => {})
+      .catch((err) =>
+        setFetchError(err instanceof Error ? err.message : "加载人员数据失败"),
+      )
       .finally(() => setLoading(false));
   }, []);
 
   const total = persons.length * 2;
+  const printUrl = "/api/admin/qr/print";
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">QR 码生成</h2>
-        <button
-          type="button"
-          onClick={() => window.open("/api/admin/qr/print", "_blank")}
-          disabled={persons.length === 0}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        <a
+          href={persons.length > 0 ? printUrl : undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-disabled={persons.length === 0}
+          onClick={(e) => {
+            if (persons.length === 0) {
+              e.preventDefault();
+            }
+          }}
+          className={
+            "inline-flex rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors " +
+            "bg-zinc-900 hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300 " +
+            (persons.length === 0
+              ? "pointer-events-none opacity-40"
+              : "")
+          }
         >
           打开打印页 ({total} 张)
-        </button>
+        </a>
       </div>
 
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -748,7 +767,11 @@ function QRSection() {
 
       {loading && <p className="text-sm text-zinc-500">加载中…</p>}
 
-      {!loading && persons.length === 0 && (
+      {fetchError && (
+        <p className="text-sm text-red-600 dark:text-red-400">{fetchError}</p>
+      )}
+
+      {!loading && !fetchError && persons.length === 0 && (
         <p className="text-sm text-zinc-500 dark:text-zinc-400">暂无人员数据，请先在「导入名单」中导入。</p>
       )}
 

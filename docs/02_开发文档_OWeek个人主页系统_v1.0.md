@@ -194,24 +194,34 @@ GET /api/admin/export  (cookie)
   → 200 表格,每行:name, /u/code, /loc/code, /edit/token(用 APP_BASE_URL 拼全)
 
 GET /api/admin/settings  (cookie)
-  → 200 { [key]: value, ... }  // 所有系统设置的键值对
+   → 200 { [key]: value, ... }
+   缺失的键自动补默认值:
+     allowStudentPublishControl → "true"  (默认允许学生自主发布)
+     hideStudentPublishToggle  → "false"  (默认显示发布开关)
 
 PATCH /api/admin/settings  (cookie)
   body { key, value }
   → 200 { ok } | 400 | 401
 
 GET /api/settings?key=...
-  公开接口,读取单个系统设置值(如 allowStudentPublishControl)
-  → 200 { value: "true" | "false" | null }
+   公开接口,读取单个系统设置值
+   编辑页读取 allowStudentPublishControl 和 hideStudentPublishToggle 两项,
+   当任何一项值为 "true" 时隐藏 Published 开关
+   → 200 { value: "true" | "false" | null }
+
+GET /api/admin/qr/print  (cookie)
+  查所有 Person 记录,为每人并行生成两张 SVG QR 码(/u/码 + /loc/码),
+  返回可打印 HTML 页面(4 列 A4 网格,自动弹出打印对话框)
+  → 200 text/html | 401
 ```
 
 ## 9. 页面渲染要点
 
 - /u/[code]:server component 直接查库渲染。hidden 或未 published 显示占位页,不白屏。图片 1:1 缩略,点开全屏用客户端灯箱组件,可滑动。
 - /loc/[code]:server component。房间号座位码做大做显眼。带客户端收藏按钮。默认不放主页链接(见 PRD 第 11 节,翻起来就是加一个跳 /u/code 的按钮)。
-- /edit/[token]:client。表单 + 图片上传组件 + 发布开关(仅管理员在系统设置中开启后才显示)。保存即时校验 bio 字数、发布前校验头像。
+- /edit/[token]:client。表单 + 图片上传组件 + 发布开关(受 allowStudentPublishControl 和 hideStudentPublishToggle 两项系统设置控制)。保存即时校验 bio 字数、发布前校验头像。
 - /me/collection:client。读 localStorage 渲染列表,链到 /loc/code。
-- /admin:client。登录后五块:导入、位置编辑、下架、导出、系统设置。
+- /admin:client。登录后六块:导入、位置编辑、下架、QR 码打印、导出、系统设置。
 
 ## 10. 收藏(纯前端)
 
@@ -240,8 +250,8 @@ GET /api/settings?key=...
 6. ✅ /loc/[code] + admin 位置编辑。
 7. ✅ 收藏 + /me/collection。
 8. ✅ admin 登录保护 + 下架开关。
-9. ✅ 二维码批量生成。
-10. 🔧 部署 + 真机端到端（已部署到 Vercel,待域名 + 真机实测）。
+9. ✅ 二维码批量生成（`/api/admin/qr/print` + admin QR 码 tab）。
+10. 🔧 部署 + 真机端到端（Vercel 已部署,待 .top 域名 + 校园网真机实测）。
 
 ## 13. 不做(v1.0 明确排除)
 

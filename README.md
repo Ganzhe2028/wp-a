@@ -142,6 +142,7 @@ app/
     admin/export/route.ts    # GET 导出 CSV 链接表
     admin/persons/route.ts   # GET 所有人列表（下架面板用）
     admin/settings/route.ts  # GET/PATCH 系统设置
+    admin/qr/print/route.ts  # GET 批量打印 QR 码（SVG，A4 优化）
     settings/route.ts        # GET 公开读单个设置
 components/
   AvatarUploader.tsx          # 头像上传（压缩 + presigned 直传）

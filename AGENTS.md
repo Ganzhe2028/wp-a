@@ -121,6 +121,10 @@ The same `Person.code` serves both `/u/{code}` (profile) and `/loc/{code}` (loca
 - `published=true` blocked unless `avatarUrl` is set (avatar required before publishing).
 - Image count must be < 4 **and** verified server-side on both upload-url and image-save endpoints.
 
+### System settings (stored in SystemSetting table, PATCH via `/api/admin/settings`)
+- `allowStudentPublishControl` — **defaults to "true"** (allow). When explicitly "false", students get 403 on `published: true`. Only checks on `published === true`, not `!== undefined`.
+- `hideStudentPublishToggle` — **defaults to "false"** (show the toggle). When "true", the Published switch is hidden from the student edit page UI entirely. This is UI-only; the server gate is still `allowStudentPublishControl`.
+
 ### States ≠ pages
 - `hidden=true` or `published=false` → show placeholder page, not blank screen. "这位同学还没布置主页" or "已隐藏".
 - Location page loads regardless of whether the person has a profile — it's the fallback for equal exposure.
