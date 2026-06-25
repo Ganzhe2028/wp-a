@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     root: process.cwd(),
   },
   outputFileTracingIncludes: {
-    "/*": ["app/generated/prisma/**/*"],
+    "/api/settings": ["app/generated/prisma/libquery_engine-darwin-arm64.dylib.node", "app/generated/prisma/libquery_engine-rhel-openssl-3.0.x.so.node"],
   },
 };
 
