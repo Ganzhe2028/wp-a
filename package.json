@@ -20,11 +20,11 @@
     "prisma": "^6.19.3",
     "qrcode": "^1.5.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "dotenv": "^16"
   },
     "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "dotenv": "^16",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
