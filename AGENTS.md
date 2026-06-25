@@ -170,6 +170,11 @@ Three independent requirements for Prisma to work on Vercel serverless:
 ### handleSave PATCH body
 - The edit page agent failed to include `avatarUrl` in the PATCH body. When someone uploads an avatar then hits Save, the avatar URL must be sent alongside other fields. Server checks `body.avatarUrl || person.avatarUrl` — if neither is set, publish is blocked.
 
+### Save/publish coupling in /api/me PATCH (fixed 2026-06-25)
+- **Bug**: `published !== undefined` gate in `/api/me/route.ts` blocked the entire PATCH when admin had `allowStudentPublishControl` disabled — including saves where `published: false`. This meant students couldn't save any profile edits unless the admin toggle was ON.
+- **Fix**: Changed to `published === true`. Now only an explicit attempt to publish sets off the admin gate. Saving with `published: false` always works.
+- **Lesson**: `!== undefined` checks on boolean fields are dangerous — `false !== undefined` is `true`. Use `=== true` when the intent is "only when actively toggling ON".
+
 ### R2 lazy initialization
 - `S3Client` instantiated at module top-level crashes the entire app if R2 env vars are missing. Use a lazy `getS3()` function that throws only at call time — the rest of the app stays functional without R2 configured.
 

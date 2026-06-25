@@ -160,8 +160,8 @@ GET /api/me?token=...
 PATCH /api/me?token=...
   body { englishName?, chineseName?, grade?, bio?, avatarUrl?, published? }
   校验:bio 按 code point 计 ≤ 80;published 置 true 时 avatarUrl 必须有值
-  注意:published 字段的修改受系统设置 allowStudentPublishControl 控制,
-        管理员未开启时返回 403
+  注意:仅当 published === true 时才检查 allowStudentPublishControl 系统设置,
+        管理员未开启时返回 403;published === false 或未传时不触发此检查
   → 200 { ok } | 400 | 403
 
 POST /api/upload-url?token=...
