@@ -221,7 +221,7 @@ GET /api/admin/qr/print  (cookie)
 - /loc/[code]:server component。房间号座位码做大做显眼。带客户端收藏按钮。默认不放主页链接(见 PRD 第 11 节,翻起来就是加一个跳 /u/code 的按钮)。
 - /edit/[token]:client。表单 + 图片上传组件 + 发布开关(受 allowStudentPublishControl 和 hideStudentPublishToggle 两项系统设置控制)。保存即时校验 bio 字数、发布前校验头像。
 - /me/collection:client。读 localStorage 渲染列表,链到 /loc/code。
-- /admin:client。登录后六块:导入、位置编辑、下架、QR 码打印、导出、系统设置。
+- /admin:client。登录后六块:导入、位置编辑、下架、QR 码打印、导出、系统设置。已做移动端适配(tab 水平滚动+渐隐遮罩、卡片堆叠布局、表格 min-w 横向滚动)。
 
 ## 10. 收藏(纯前端)
 
