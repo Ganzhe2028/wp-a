@@ -221,7 +221,7 @@ GET /api/admin/qr/print  (cookie)
 - /loc/[code]:server component。房间号座位码做大做显眼。带客户端收藏按钮。默认不放主页链接(见 PRD 第 11 节,翻起来就是加一个跳 /u/code 的按钮)。
 - /edit/[token]:client。表单 + 图片上传组件 + 发布开关(受 allowStudentPublishControl 和 hideStudentPublishToggle 两项系统设置控制)。保存即时校验 bio 字数、发布前校验头像。
 - /me/collection:client。读 localStorage 渲染列表,链到 /loc/code。
-- /admin:client。登录后六块:导入、位置编辑、下架、QR 码打印、导出、系统设置。已做移动端适配(tab 水平滚动+渐隐遮罩、卡片堆叠布局、表格 min-w 横向滚动)。
+- /admin:client。登录后七块:导入、位置编辑、下架、QR 码打印、导出、系统设置、重置密码。已做移动端适配(tab 水平滚动+渐隐遮罩、卡片堆叠布局、表格 min-w 横向滚动)。
 
 ## 10. 收藏(纯前端)
 
@@ -235,7 +235,7 @@ GET /api/admin/qr/print  (cookie)
 2. ✅ Neon 建库,拿 pooled 和 direct 两个连接串。
 3. ✅ 配 .env,prisma migrate 建表。
 4. ✅ Cloudflare R2 建桶,开公开访问(自定义域或 r2.dev),拿 access key,配 CORS 允许 PUT。
-5. ✅ Vercel 连仓,填全部环境变量,部署。生产: `https://oweek26.vercel.app`
+5. ✅ Vercel 连仓,填全部环境变量,部署。生产: `https://msoweek.site`（注：v2.0 后域名已迁移至此）
 6. .top 域名解析走 Cloudflare,指向 Vercel,HTTPS 自动。
 7. 校园网 + 手机真机实测 /u 和 /loc 打开速度。慢或不稳就启用学校域名服务器方案。
 8. 运营导入名单,出链接表,写 300 张标签 + 印二维码,逐张验证。
@@ -256,3 +256,5 @@ GET /api/admin/qr/print  (cookie)
 ## 13. 不做(v1.0 明确排除)
 
 服务端账号密码、找回密码、评论、点赞、社交链接聚合、消息通知、配对算法、服务端收藏。这些都不在本期,不要顺手实现。
+
+> **v2.0 已实现**: 账号系统（用户名+密码登录）、服务端收藏（单向静默）、重置密码（admin 人工）。详见 `docs/04_开发文档_v2.0_账号系统迁移.md`。

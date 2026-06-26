@@ -136,7 +136,7 @@ Self-contained HTML with all 6 screens. Click through or use arrow keys. Animati
 
 ## Tech Stack (locked)
 
-Next.js App Router v15+, React, TypeScript, Prisma + Neon PostgreSQL, Cloudflare R2 (S3-compatible), Tailwind, browser-image-compression, nanoid, qrcode, jose. Deploy on Vercel behind Cloudflare DNS.
+Next.js App Router v16+, React, TypeScript, Prisma + Neon PostgreSQL, Cloudflare R2 (S3-compatible), Tailwind, browser-image-compression, nanoid, qrcode, jose. Deploy on Vercel behind Cloudflare DNS.
 
 **Do not add unlisted frameworks or libraries.** The stack is frozen. Password hashing uses Node built-in `node:crypto` scrypt — no bcrypt/argon2.
 
