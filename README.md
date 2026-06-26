@@ -1,10 +1,10 @@
-# OWeek 个人主页系统 · v1.0
+# OWeek 个人主页系统 · v2.0
 
 新生在线编辑个人主页，OWeek 期间通过 NFC 碰一碰或二维码扫码查看：墙上明信片→位置页，展位展板→主页。
 
 ## 一句话
 
-把线下碰一碰变成一场认识人的旅途——先碰明信片找到对方的展位在哪，走过去当面聊，再碰展板看主页。全程没有账号、没有密码，链接就是身份。
+把线下碰一碰变成一场认识人的旅途——先碰明信片找到对方的展位在哪，走过去当面聊，再碰展板看主页。学生凭账号密码登录，一次登录活动期内全程不掉。
 
 ## 技术栈
 
@@ -16,6 +16,7 @@
 | 图片压缩 | browser-image-compression（浏览器端） |
 | 短码/Token | nanoid |
 | 二维码 | qrcode |
+| 会话 | jose (JWT) |
 | 样式 | Tailwind CSS，手机端优先 |
 | 部署 | Vercel + Cloudflare DNS |
 
@@ -58,6 +59,7 @@ R2_SECRET_ACCESS_KEY=
 R2_BUCKET=
 R2_PUBLIC_BASE_URL=     # R2 公开访问域名
 ADMIN_PASSWORD=         # 运营后台口令
+SESSION_SECRET=         # 学生 session 签名密钥（至少 32 字节，openssl rand -base64 48 生成）
 APP_BASE_URL=           # 如 https://xxx.top，导出链接拼前缀用
 PRISMA_QUERY_ENGINE_LIBRARY=  # Vercel 部署需设，指向引擎 .node 文件（可选但推荐）
 ```
@@ -192,16 +194,22 @@ app/generated/prisma/        # Prisma 生成客户端（已提交 git）
 | 构建 | `npm run build` |
 | 生产启动 | `npm start` |
 
-## v1.0 范围
+## 版本演进
 
-**做**：个人主页编辑、位置页展示、浏览器本地收藏、运营后台
+v2.0 在 v1.0 基础上新增：
+- **账号体系**：学生凭用户名+密码登录，session cookie 保持 14 天
+- **服务端收藏**：替换 v1.0 的 localStorage 收藏，挂在账号上，单向静默
+- **个人中心 `/me`**：编辑主页 + 收藏列表同页展示
 
-**不做**：服务端账号、登录/注册、评论、点赞、社交链接、配对算法、消息通知
+## v2.0 不做
+
+评论、点赞、社交链接、配对算法、消息通知、学生自助找回密码
 
 ## 文档
 
 - [PRD – 产品需求文档](docs/01_PRD_OWeek个人主页系统_v1.0.md)
-- [开发文档 – 接口契约与构建顺序](docs/02_开发文档_OWeek个人主页系统_v1.0.md)
+- [开发文档 v1.0 – 接口契约与构建顺序](docs/02_开发文档_OWeek个人主页系统_v1.0.md)
+- [开发文档 v2.0 – 账号系统迁移](docs/04_开发文档_v2.0_账号系统迁移.md)
 - [操作手册 – 新人接手指南](docs/03_操作手册.md)
 - [AGENTS.md](AGENTS.md) – coding agent 工作规范
 
