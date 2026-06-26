@@ -56,7 +56,6 @@ export default function MeEditForm({ person: initialPerson }: MeEditFormProps) {
   const [hidePublishToggle, setHidePublishToggle] = useState(false);
   const [hasBeenEdited, setHasBeenEdited] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [collectionCount, setCollectionCount] = useState(0);
   const [personCode, setPersonCode] = useState(initialPerson.code);
 
   const bioCodePoints = [...(form.bio || "")].length;
@@ -94,15 +93,7 @@ export default function MeEditForm({ person: initialPerson }: MeEditFormProps) {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("owk_collection");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) setCollectionCount(parsed.length);
-      }
-    } catch {}
-  }, []);
+
 
   const updateField = useCallback(
     <K extends keyof PersonData>(field: K, value: PersonData[K]) => {
@@ -243,22 +234,7 @@ export default function MeEditForm({ person: initialPerson }: MeEditFormProps) {
                 </svg>
               </Link>
             )}
-            <Link
-              href="/me/collection"
-              className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-stone-100 text-stone-500 transition-colors hover:bg-rose-50 hover:text-rose-600"
-              aria-label="My collection"
-              title="我的收藏"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                <title>My collection</title>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-              </svg>
-              {collectionCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-rose-400 text-white text-[10px] font-bold flex items-center justify-center px-1 shadow-sm">
-                  {collectionCount}
-                </span>
-              )}
-            </Link>
+            
             {hasBeenEdited && (
               <button
                 type="button"
@@ -290,21 +266,6 @@ export default function MeEditForm({ person: initialPerson }: MeEditFormProps) {
             disabled={!isEditing}
           />
         </div>
-
-        <Link
-            href="/me/collection"
-            className="mb-6 flex items-center gap-2 rounded-2xl bg-white p-4 shadow-sm text-sm font-medium text-stone-700 transition-colors hover:bg-rose-50 hover:text-rose-600"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-              <title>My collection</title>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-            </svg>
-            我的收藏{collectionCount > 0 ? ` (${collectionCount})` : ''}
-            <svg className="ml-auto h-4 w-4 text-stone-300" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-              <title>Go</title>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-          </Link>
 
         <div className="space-y-5 rounded-2xl bg-white p-6 shadow-sm">
           {isEditing ? (
