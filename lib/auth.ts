@@ -47,6 +47,16 @@ export function setAdminCookie(token: string) {
   };
 }
 
+export function clearAdminCookie() {
+  return {
+    name: COOKIE_NAME,
+    value: "",
+    httpOnly: true,
+    path: "/",
+    maxAge: 0,
+  };
+}
+
 export async function verifyEditToken(
   token: string
 ): Promise<{ id: string } | null> {

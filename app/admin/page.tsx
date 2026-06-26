@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -189,7 +189,7 @@ function LoginScreen({
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="输入口令"
-          className="mb-4 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
+          className="mb-4 block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
         />
 
         {error && (
@@ -212,35 +212,51 @@ function LoginScreen({
 /*  Dashboard                                                          */
 /* ------------------------------------------------------------------ */
 
-function Dashboard({ tab, onTabChange }: { tab: TabId; onTabChange: (t: TabId) => void }) {
+function Dashboard({ tab, onTabChange, onLogout }: { tab: TabId; onTabChange: (t: TabId) => void; onLogout: () => void }) {
+  const activeTabRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    activeTabRef.current?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [tab]);
+
   return (
     <div className="mx-auto min-h-svh max-w-5xl bg-zinc-50 dark:bg-zinc-950">
       <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/80">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <h1 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">运营后台</h1>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          >
+            登出
+          </button>
         </div>
-        <nav
-          className="mx-auto flex max-w-5xl gap-0 overflow-x-auto px-4
-            [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
-            after:pointer-events-none after:absolute after:right-0 after:top-0 after:z-10 after:h-full after:w-8 after:bg-gradient-to-l after:from-white after:to-transparent
-            dark:after:from-zinc-900/80 relative"
-        >
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => onTabChange(t.id)}
-              className={
-                "shrink-0 border-b-2 px-4 py-2 text-sm font-medium transition-colors " +
-                (tab === t.id
-                  ? "border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100"
-                  : "border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300")
-              }
-            >
-              {t.label}
-            </button>
-          ))}
-        </nav>
+        <div className="relative">
+          <nav
+            role="tablist"
+            className="mx-auto flex max-w-5xl gap-0 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {TABS.map((t) => (
+              <button
+                key={t.id}
+                ref={tab === t.id ? activeTabRef : null}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.id}
+                onClick={() => onTabChange(t.id)}
+                className={
+                  "shrink-0 border-b-2 px-4 py-2 text-sm font-medium transition-colors " +
+                  (tab === t.id
+                    ? "border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100"
+                    : "border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300")
+                }
+              >
+                {t.label}
+              </button>
+            ))}
+          </nav>
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-8 bg-gradient-to-l from-white to-transparent dark:from-zinc-900/80" />
+        </div>
       </header>
       <main className="p-4">
         {tab === "import" && <ImportSection />}
@@ -315,7 +331,7 @@ function ImportSection() {
         onChange={(e) => setText(e.target.value)}
         placeholder={"John,张三,9\nAlice,李四,10"}
         rows={8}
-        className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
+        className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
       />
 
        <div className="flex flex-wrap gap-2">
@@ -473,7 +489,7 @@ function LocationSection() {
             value={form.code}
             onChange={(e) => setForm({ ...form, code: e.target.value })}
             placeholder="例如 abc123"
-            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
           />
         </div>
         <div>
@@ -483,7 +499,7 @@ function LocationSection() {
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             placeholder="张三"
-            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
           />
         </div>
         <div>
@@ -493,7 +509,7 @@ function LocationSection() {
             value={form.grade}
             onChange={(e) => setForm({ ...form, grade: e.target.value })}
             placeholder="例如 9"
-            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
           />
         </div>
         <div>
@@ -503,7 +519,7 @@ function LocationSection() {
             value={form.room}
             onChange={(e) => setForm({ ...form, room: e.target.value })}
             placeholder="例如 A101"
-            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
           />
         </div>
         <div>
@@ -513,7 +529,7 @@ function LocationSection() {
             value={form.seat}
             onChange={(e) => setForm({ ...form, seat: e.target.value })}
             placeholder="例如 12"
-            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
           />
         </div>
 
@@ -602,7 +618,7 @@ function TakedownSection() {
   }
 
   if (loading) {
-    return <p className="text-sm text-zinc-500">加载中\u2026</p>;
+    return <p className="text-sm text-zinc-500">加载中…</p>;
   }
 
   return (
@@ -612,8 +628,8 @@ function TakedownSection() {
       <input
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="搜索姓名、英文名或短码\u2026"
-        className="block w-full max-w-md rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+        placeholder="搜索姓名、英文名或短码…"
+        className="block w-full max-w-md rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
       />
 
       {filtered.length === 0 && (
@@ -730,7 +746,7 @@ function ExportSection({ onTabChange }: { onTabChange: (t: TabId) => void }) {
         </button>
       </div>
 
-      {loading && <p className="text-sm text-zinc-500">加载中\u2026</p>}
+      {loading && <p className="text-sm text-zinc-500">加载中…</p>}
 
       {rows && rows.length === 0 && (
         <p className="text-sm text-zinc-500 dark:text-zinc-400">暂无数据</p>
@@ -1094,7 +1110,7 @@ function ResetPasswordSection() {
             value={code}
             onChange={(e) => setCode(e.target.value)}
             placeholder="例如 abc123"
-            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
           />
         </div>
 
@@ -1135,9 +1151,29 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [tab, setTab] = useState<TabId>("import");
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/admin/session")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.authed) setLoggedIn(true);
+      })
+      .catch(() => {})
+      .finally(() => setChecking(false));
+  }, []);
+
+  async function handleLogout() {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch {
+      /* empty */
+    }
+    setLoggedIn(false);
+    setPassword("");
+  }
 
   async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
     setLoginError("");
     setLoggingIn(true);
     try {
@@ -1159,6 +1195,14 @@ export default function AdminPage() {
     }
   }
 
+  if (checking) {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+        <p className="text-sm text-zinc-500">加载中…</p>
+      </div>
+    );
+  }
+
   if (!loggedIn) {
     return (
       <LoginScreen
@@ -1171,5 +1215,5 @@ export default function AdminPage() {
     );
   }
 
-  return <Dashboard tab={tab} onTabChange={setTab} />;
+  return <Dashboard tab={tab} onTabChange={setTab} onLogout={handleLogout} />;
 }
