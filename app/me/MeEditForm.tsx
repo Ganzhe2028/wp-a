@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import AvatarUploader from "@/components/AvatarUploader";
 import ImageGrid from "@/components/ImageGrid";
+import ShareButton from "./ShareButton";
 
 interface PersonData {
   englishName: string | null;
@@ -255,6 +256,7 @@ export default function MeEditForm({ person: initialPerson }: MeEditFormProps) {
                 )}
               </button>
             )}
+            <ShareButton code={personCode} />
           </div>
         </div>
 

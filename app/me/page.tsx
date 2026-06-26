@@ -3,6 +3,7 @@ import { verifyStudentSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import MeEditForm from "./MeEditForm";
 import FavoritesList from "./FavoritesList";
+import LogoutButton from "./LogoutButton";
 
 interface PageImage {
   id: string;
@@ -65,6 +66,7 @@ export default async function MePage() {
         <div className="mt-6">
           <FavoritesList />
         </div>
+        <LogoutButton />
       </div>
     </div>
   );
