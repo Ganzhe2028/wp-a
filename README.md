@@ -80,7 +80,7 @@ npm run dev               # 启动开发服务器 → http://localhost:3000
 3. Cloudflare R2 建桶 → 开公开访问 + 配 CORS → 拿到 S3 密钥
 4. Vercel 连仓 → 填环境变量 → 部署
 
-生产地址：`https://oweek26.vercel.app`
+生产地址：`https://msoweek.site`
 
 ⚠️ Vercel 部署特别注意：
 - `binaryTargets` 必须包含 `"rhel-openssl-3.0.x"`（Vercel 用的是 Amazon Linux，不是 Debian）
@@ -215,4 +215,4 @@ v2.0 在 v1.0 基础上新增：
 
 ## 线上
 
-生产环境：**[oweek26.vercel.app](https://oweek26.vercel.app)**（Vercel，`main` 分支 push 自动部署）
+生产环境：**[msoweek.site](https://msoweek.site)**（Vercel，`main` 分支 push 自动部署）

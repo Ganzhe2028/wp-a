@@ -102,14 +102,15 @@ export default async function LocationCardPage({ params }: Props) {
             </span>
           </div>
 
-          {/* Favorite */}
-          <div className="flex justify-center">
-            <FavoriteButton
-              code={location.code}
-              name={location.name}
-              initialFavorited={initialFavorited}
-            />
-          </div>
+          {session.personId !== location.person?.id && (
+            <div className="flex justify-center">
+              <FavoriteButton
+                code={location.code}
+                name={location.name}
+                initialFavorited={initialFavorited}
+              />
+            </div>
+          )}
         </div>
       </div>
     </main>

@@ -189,7 +189,7 @@ Comments, likes, social links, pairing algorithms, notifications, student self-s
 - No bcrypt/argon2 — use built-in `node:crypto` scrypt.
 
 ## Deployed URL
-Production: `https://oweek26.vercel.app` (Vercel, auto-deploys from `main` branch).
+Production: `https://msoweek.site` (Vercel, auto-deploys from `main` branch).
 
 ## Pitfalls
 

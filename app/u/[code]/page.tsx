@@ -86,7 +86,9 @@ export default async function ProfilePage({ params }: PageProps) {
     initialFavorited = !!existing;
   }
 
-  const showFavoriteButton = session && person && !person.hidden && person.published;
+  const showFavoriteButton =
+    session && person && !person.hidden && person.published &&
+    session.personId !== person.id;
 
   return (
     <div className="min-h-screen bg-zinc-50">
