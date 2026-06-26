@@ -559,6 +559,9 @@ function TakedownSection() {
   const [persons, setPersons] = useState<Person[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [batchSaving, setBatchSaving] = useState(false);
+  const selectAllRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch("/api/admin/persons")
@@ -578,6 +581,42 @@ function TakedownSection() {
     );
   });
 
+  const filteredIds = new Set(filtered.map((p) => p.id));
+  const selectedCount = [...selectedIds].filter((id) => filteredIds.has(id)).length;
+  const allFilteredSelected = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
+
+  /* keep the select-all checkbox in sync with selection state */
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = selectedCount > 0 && !allFilteredSelected;
+    }
+  }, [selectedCount, allFilteredSelected]);
+
+  function toggleSelectAll() {
+    if (allFilteredSelected) {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        for (const id of filteredIds) next.delete(id);
+        return next;
+      });
+    } else {
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        for (const id of filteredIds) next.add(id);
+        return next;
+      });
+    }
+  }
+
+  function toggleSelectOne(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   async function togglePerson(person: Person) {
     try {
       await fetch("/api/admin/takedown", {
@@ -591,6 +630,32 @@ function TakedownSection() {
     } catch {
       /* empty */
     }
+  }
+
+  async function batchToggle(hidden: boolean) {
+    setBatchSaving(true);
+    const targets = [...selectedIds]
+      .filter((id) => filteredIds.has(id))
+      .map((id) => persons.find((p) => p.id === id)!)
+      .filter((p) => p && p.hidden !== hidden);
+
+    await Promise.allSettled(
+      targets.map((p) =>
+        fetch("/api/admin/takedown", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "person", id: p.id, hidden }),
+        })
+      )
+    );
+
+    setPersons((prev) =>
+      prev.map((p) =>
+        selectedIds.has(p.id) ? { ...p, hidden } : p
+      )
+    );
+    setSelectedIds(new Set());
+    setBatchSaving(false);
   }
 
   async function toggleImage(imageId: string, personId: string, currentHidden: boolean) {
@@ -638,6 +703,46 @@ function TakedownSection() {
         </p>
       )}
 
+      {filtered.length > 0 && (
+        <>
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-2.5 dark:border-zinc-800 dark:bg-zinc-900">
+            <label className="flex items-center gap-2 text-sm text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+              <input
+                ref={selectAllRef}
+                type="checkbox"
+                checked={allFilteredSelected}
+                onChange={toggleSelectAll}
+                className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+              />
+              全选
+            </label>
+            {selectedCount > 0 && (
+              <>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                  已选 {selectedCount} 人
+                </span>
+                <button
+                  type="button"
+                  disabled={batchSaving}
+                  onClick={() => batchToggle(false)}
+                  className="rounded-lg bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-200 disabled:opacity-40 dark:bg-emerald-900/40 dark:text-emerald-400 dark:hover:bg-emerald-900/60"
+                >
+                  {batchSaving ? "处理中…" : "显示选中"}
+                </button>
+                <button
+                  type="button"
+                  disabled={batchSaving}
+                  onClick={() => batchToggle(true)}
+                  className="rounded-lg bg-red-100 px-3 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-200 disabled:opacity-40 dark:bg-red-900/40 dark:text-red-400 dark:hover:bg-red-900/60"
+                >
+                  {batchSaving ? "处理中…" : "隐藏选中"}
+                </button>
+              </>
+            )}
+          </div>
+        </>
+      )}
+
       <div className="space-y-3">
         {filtered.map((person) => (
           <div
@@ -645,23 +750,31 @@ function TakedownSection() {
             className="rounded-lg border border-zinc-200 bg-white p-3 sm:p-4 dark:border-zinc-800 dark:bg-zinc-900"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline gap-2">
-                  <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                    {person.chineseName ?? "\u2014"}
-                  </span>
-                  <span className="text-sm text-zinc-500 dark:text-zinc-400">
-                    {person.englishName ?? ""}
-                  </span>
-                  <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                    {person.code}
-                  </code>
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(person.id)}
+                  onChange={() => toggleSelectOne(person.id)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+                />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-baseline gap-2">
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                      {person.chineseName ?? "\u2014"}
+                    </span>
+                    <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                      {person.englishName ?? ""}
+                    </span>
+                    <code className="rounded bg-zinc-100 px-1 py-0.5 font-mono text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                      {person.code}
+                    </code>
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
+                    {"已发布：" + (person.published ? "是" : "否") + " ｜ 图片：" + person.images.length}
+                  </p>
                 </div>
-                <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-                  {"已发布：" + (person.published ? "是" : "否") + " ｜ 图片：" + person.images.length}
-                </p>
               </div>
-              <div className="shrink-0">
+              <div className="shrink-0 sm:ml-10">
                 <button
                   type="button"
                   onClick={() => togglePerson(person)}
