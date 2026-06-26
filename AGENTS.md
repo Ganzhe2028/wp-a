@@ -224,6 +224,18 @@ The original `v2.0` implementation rejected PATCH with 403 when `published` was 
 ### Cloudflare / Neon / R2 unaffected by auth changes
 The account system migration (v1.0→v2.0) does NOT affect: R2 presigned URL flow, Neon pooled/direct connection strings, Cloudflare DNS, or QR code generation. The only new env var is `SESSION_SECRET`.
 
+### Admin: session check + logout routes (added 2026-06-26)
+- `GET /api/admin/session` — returns `{ authed: boolean }`. Admin page mounts with a session check so refresh doesn't force re-login.
+- `POST /api/admin/logout` — clears `owk_admin` cookie server-side via `clearAdminCookie()`.
+- `clearAdminCookie()` mirrors `clearStudentCookie()` but uses admin's `COOKIE_NAME`.
+
+### Admin: export now includes code (2026-06-26)
+- Export CSV header: `chineseName,englishName,username,code,homepage,location`.
+- The `code` column enables the "重置" button on each row in the export table — clicking it navigates to the reset-password tab with the code pre-filled via `sessionStorage`.
+
+### handleLogin e.preventDefault() (2026-06-26)
+- When refactoring `AdminPage`, do NOT drop `e.preventDefault()` from `handleLogin`. Without it, the form submits as a full page reload, the session cookie isn't set properly, and the user is bounced back to the login screen. This happened once already.
+
 ### handleSave PATCH body
 - The edit page agent failed to include `avatarUrl` in the PATCH body. When someone uploads an avatar then hits Save, the avatar URL must be sent alongside other fields.
 

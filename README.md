@@ -147,7 +147,9 @@ app/
     admin/import/route.ts    # POST 批量导入（生成账号密码）
     admin/location/route.ts  # POST 编辑位置页
     admin/takedown/route.ts  # POST 下架开关
-    admin/export/route.ts    # GET 导出 CSV（含用户名、主页、展位链接）
+    admin/export/route.ts    # GET 导出 CSV（含用户名、短码、主页、展位链接）
+    admin/session/route.ts   # GET 校验当前 admin 会话
+    admin/logout/route.ts    # POST 清除 admin cookie 登出
     admin/persons/route.ts   # GET 所有人列表
     admin/settings/route.ts  # GET/PATCH 系统设置
     admin/reset-password/route.ts  # POST 重置学生密码
