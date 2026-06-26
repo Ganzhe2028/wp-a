@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1512, initial-scale=1.0">
+<title>Welcom👀n — Figma Prototype</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+  :root {
+    --orange: #FF530F;
+    --white: #FFFFFF;
+    --card-bg: #F7F7F7;
+    --border: #D9D9D9;
+    --grey: #E6E6E6;
+    --placeholder: #EBEBEB;
+    --text-dark: #000000;
+    --text-subtle: #D9D9D9;
+    --text-label: #808080;
+    --fw-medium: 500;
+    --fw-regular: 400;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .viewport {
+    width: 1512px;
+    height: 982px;
+    background: var(--white);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    border-radius: 4px;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+  }
+
+  /* ---- Screen positioning ---- */
+  .screen.active { transform: translateY(0); opacity: 1; z-index: 1; }
+  .screen.below  { transform: translateY(100%); opacity: 0; z-index: 0; }
+  .screen.above  { transform: translateY(-100%); opacity: 0; z-index: 0; }
+  .screen.hidden { transform: translateY(0); opacity: 0; z-index: 0; pointer-events: none; }
+
+  /* ---- Screen 0: Splash ---- */
+  .splash-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+  }
+  .splash-title {
+    font-family: 'Inter', sans-serif;
+    font-weight: var(--fw-medium);
+    font-size: 150px;
+    line-height: 1.33;
+    text-align: right;
+    color: var(--text-dark);
+    white-space: pre-line;
+  }
+
+  /* ---- Screen 1: Welcome ---- */
+  .welcome-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0 76px;
+  }
+  .welcome-left, .welcome-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    position: relative;
+    z-index: 1;
+  }
+  .welcome-heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: var(--fw-medium);
+    font-size: 60px;
+    line-height: 1.35;
+    text-align: center;
+    color: var(--text-dark);
+    white-space: pre-line;
+  }
+  .welcome-heading .large { font-size: 75px; }
+  .welcome-subtitle {
+    position: absolute;
+    top: 50px;
+    right: 76px;
+    font-family: 'Inter', sans-serif;
+    font-weight: var(--fw-medium);
+    font-size: 50px;
+    line-height: 1.35;
+    text-align: right;
+    color: var(--text-subtle);
+    white-space: pre-line;
+  }
+  .welcome-sidebar {
+    position: absolute;
+    right: 0;
+    top: -121px;
+    width: 310px;
+    height: 1103px;
+    background: var(--white);
+  }
+
+  /* ---- Buttons ---- */
+  .btn-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--orange);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .btn-circle:hover { transform: scale(1.08); }
+  .btn-circle:active { transform: scale(0.95); }
+  .btn-circle svg {
+    width: 26px;
+    height: 31px;
+  }
+
+  .btn-rect {
+    height: 60px;
+    padding: 0 36px;
+    border-radius: 30px;
+    background: var(--orange);
+    border: none;
+    cursor: pointer;
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    font-weight: var(--fw-regular);
+    font-size: 30px;
+    line-height: 1.5;
+    color: var(--white);
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s;
+  }
+  .btn-rect:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(255, 83, 15, 0.35); }
+  .btn-rect:active { transform: translateY(0); }
+
+  .btn-rect.small {
+    height: auto;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-size: 20px;
+  }
+  .btn-rect.medium {
+    width: 180px;
+  }
+
+  /* Arrow icon in rectangle button */
+  .btn-rect .arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 4px;
+  }
+
+  /* ---- Screen 3/4/5: Profile & Edit ---- */
+  .profile-content, .edit-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .page-subtitle {
+    position: absolute;
+    top: 50px;
+    right: 76px;
+    font-family: 'Inter', sans-serif;
+    font-weight: var(--fw-medium);
+    font-size: 50px;
+    line-height: 1.35;
+    text-align: right;
+    color: var(--text-subtle);
+    z-index: 2;
+  }
+
+  /* Card */
+  .card-wrapper {
+    position: relative;
+    transform: rotate(-10deg);
+  }
+  .card-shadow {
+    position: absolute;
+    inset: -20px;
+    background: var(--grey);
+    border-radius: 75px;
+    transform: rotate(3deg);
+    z-index: 0;
+  }
+  .card {
+    position: relative;
+    width: 875px;
+    height: 631px;
+    background: var(--card-bg);
+    border: 20px solid var(--border);
+    border-radius: 75px;
+    display: flex;
+    align-items: center;
+    padding: 50px 60px;
+    gap: 40px;
+    z-index: 1;
+  }
+  .card-avatar {
+    width: 232px;
+    height: 232px;
+    border: 7.5px solid var(--grey);
+    border-radius: 30px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 22px;
+  }
+  .card-avatar .upload-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .card-avatar:hover .upload-overlay { opacity: 1; }
+  .card-fields {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .card-field-placeholder {
+    background: var(--placeholder);
+    border-radius: 12px;
+  }
+  .card-field-placeholder.name {
+    width: 204px;
+    height: 74px;
+  }
+  .card-field-placeholder.bio {
+    width: 376px;
+    height: 105px;
+  }
+
+  /* Edit mode */
+  .card-fields .field-label {
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    font-weight: var(--fw-regular);
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--text-label);
+    text-align: right;
+    margin-bottom: 4px;
+  }
+  .card-fields .field-hint {
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    font-weight: var(--fw-regular);
+    font-size: 10px;
+    line-height: 1.5;
+    color: var(--text-subtle);
+    text-align: right;
+    margin-top: -10px;
+  }
+
+  .action-bar {
+    position: absolute;
+    bottom: 180px;
+  }
+
+  /* ---- Screen 5: Adjective ---- */
+  .adj-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 50px 76px;
+    gap: 24px;
+  }
+  .adj-heading {
+    font-family: 'Inter', sans-serif;
+    font-weight: var(--fw-medium);
+    font-size: 50px;
+    line-height: 1.35;
+    text-align: right;
+    color: var(--text-subtle);
+  }
+  .adj-desc {
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    font-weight: var(--fw-regular);
+    font-size: 20px;
+    line-height: 1.5;
+    text-align: right;
+    color: var(--text-dark);
+  }
+
+  /* ---- Transitions ---- */
+  .push-top-enter {
+    animation: pushIn 2.084s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  .push-top-exit {
+    animation: pushOut 2.084s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  @keyframes pushIn {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes pushOut {
+    from { transform: translateY(0); opacity: 1; }
+    to   { transform: translateY(-100%); opacity: 0; }
+  }
+
+  /* Spring animation for edit page auto-advance */
+  /* mass:1 stiffness:222 damping:3.7 → underdamped oscillation */
+  @keyframes springBounce {
+    0%   { transform: translateY(0); }
+    15%  { transform: translateY(-12px); }
+    30%  { transform: translateY(6px); }
+    45%  { transform: translateY(-3px); }
+    60%  { transform: translateY(1px); }
+    75%  { transform: translateY(0); }
+    100% { transform: translateY(0); }
+  }
+
+  .spring-enter {
+    animation: springEnter 3.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  @keyframes springEnter {
+    0%   { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  /* ---- Nav dots ---- */
+  .nav-dots {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+  }
+  .nav-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s, transform 0.3s;
+    cursor: pointer;
+  }
+  .nav-dot.current { background: var(--orange); transform: scale(1.4); }
+
+  /* ---- Reduced motion ---- */
+  @media (prefers-reduced-motion: reduce) {
+    .screen, .push-top-enter, .push-top-exit, .spring-enter,
+    .btn-circle, .btn-rect {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="viewport" id="app">
+
+  <!-- ====== Screen 0: Splash ====== -->
+  <div class="screen active" id="screen-0" data-screen="0">
+    <div class="splash-content">
+      <h1 class="splash-title">Your First<br>Exhibition in MSA</h1>
+      <button class="btn-rect" onclick="navigateTo(1, 'push')">
+        开启
+        <span class="arrow">
+          <svg width="26" height="31" viewBox="0 0 26 31" fill="none">
+            <rect x="10" y="0" width="6" height="20" rx="1" fill="white"/>
+            <polygon points="0,20 26,20 13,31" fill="white"/>
+          </svg>
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ====== Screen 1: Welcome ====== -->
+  <div class="screen below" id="screen-1" data-screen="1">
+    <div class="welcome-subtitle">Your First<br>Exhibition in MSA</div>
+    <div class="welcome-content">
+      <div class="welcome-sidebar"></div>
+      <div class="welcome-left">
+        <h2 class="welcome-heading">Explore<br>The Exhibition</h2>
+        <button class="btn-circle" onclick="navigateTo(2, 'push')">
+          <svg width="26" height="31" viewBox="0 0 26 31" fill="none">
+            <rect x="10" y="0" width="6" height="20" rx="1" fill="white"/>
+            <polygon points="0,20 26,20 13,31" fill="white"/>
+          </svg>
+        </button>
+      </div>
+      <div class="welcome-right">
+        <h2 class="welcome-heading">Accurate<br>Your Exhibition</h2>
+        <button class="btn-circle" onclick="navigateTo(2, 'push')">
+          <svg width="26" height="31" viewBox="0 0 26 31" fill="none">
+            <rect x="10" y="0" width="6" height="20" rx="1" fill="white"/>
+            <polygon points="0,20 26,20 13,31" fill="white"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Screen 2: Profile View ====== -->
+  <div class="screen below" id="screen-2" data-screen="2">
+    <div class="page-subtitle">Who am I?</div>
+    <div class="profile-content">
+      <div class="card-wrapper">
+        <div class="card-shadow"></div>
+        <div class="card">
+          <div class="card-avatar"></div>
+          <div class="card-fields">
+            <div class="card-field-placeholder name"></div>
+            <div class="card-field-placeholder bio"></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn-rect medium" onclick="navigateTo(3, 'fade')">编辑名片</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Screen 3: Edit Page ====== -->
+  <div class="screen below" id="screen-3" data-screen="3">
+    <div class="page-subtitle">Who am I?</div>
+    <div class="profile-content">
+      <div class="card-wrapper">
+        <div class="card-shadow"></div>
+        <div class="card">
+          <div class="card-avatar">
+            <div class="upload-overlay">
+              <button class="btn-rect small">提交头像</button>
+            </div>
+          </div>
+          <div class="card-fields">
+            <div class="field-label">姓名:</div>
+            <div class="card-field-placeholder name"></div>
+            <div class="field-label">用户名:</div>
+            <div class="card-field-placeholder bio"></div>
+            <div class="field-hint">自己给自己的名字</div>
+          </div>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn-rect medium" onclick="navigateTo(4, 'spring')">我填好了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Screen 4: Edit v2 (spring destination) ====== -->
+  <div class="screen below" id="screen-4" data-screen="4">
+    <div class="page-subtitle">Who am I?</div>
+    <div class="profile-content">
+      <div class="card-wrapper">
+        <div class="card-shadow"></div>
+        <div class="card">
+          <div class="card-avatar">
+            <div class="upload-overlay">
+              <button class="btn-rect small">提交头像</button>
+            </div>
+          </div>
+          <div class="card-fields">
+            <div class="field-label">姓名:</div>
+            <div class="card-field-placeholder name"></div>
+            <div class="field-label">用户名:</div>
+            <div class="card-field-placeholder bio"></div>
+            <div class="field-hint">自己给自己的名字</div>
+          </div>
+        </div>
+      </div>
+      <div class="action-bar">
+        <button class="btn-rect medium" onclick="navigateTo(5, 'push')">我填好了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Screen 5: Adjective ====== -->
+  <div class="screen below" id="screen-5" data-screen="5">
+    <div class="adj-content">
+      <div class="adj-heading">.adj</div>
+      <p class="adj-desc">这里是一些学长学姐给自己的形容</p>
+    </div>
+  </div>
+
+  <!-- Nav dots -->
+  <div class="nav-dots" id="navDots"></div>
+</div>
+
+<script>
+  const TOTAL_SCREENS = 6;
+  let currentScreen = 0;
+  let isAnimating = false;
+
+  // Build nav dots
+  const navDotsEl = document.getElementById('navDots');
+  for (let i = 0; i < TOTAL_SCREENS; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' current' : '');
+    dot.onclick = () => navigateTo(i, i > currentScreen ? 'push' : 'fade');
+    navDotsEl.appendChild(dot);
+  }
+
+  function updateDots(idx) {
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.className = 'nav-dot' + (i === idx ? ' current' : '');
+    });
+  }
+
+  async function navigateTo(targetIdx, transition) {
+    if (isAnimating || targetIdx === currentScreen) return;
+    if (targetIdx < 0 || targetIdx >= TOTAL_SCREENS) return;
+    isAnimating = true;
+
+    const fromEl = document.getElementById('screen-' + currentScreen);
+    const toEl = document.getElementById('screen-' + targetIdx);
+
+    if (transition === 'push') {
+      const duration = currentScreen === 0 ? 2084 : 2084;
+      // Exit current (slide up)
+      fromEl.style.transition = `transform ${duration}ms cubic-bezier(0.4, 0, 0.2, 1), opacity ${duration/2}ms ease`;
+      fromEl.style.transform = 'translateY(-100%)';
+      fromEl.style.opacity = '0';
+
+      // Enter target (slide from bottom)
+      toEl.style.transition = 'none';
+      toEl.style.transform = 'translateY(100%)';
+      toEl.style.opacity = '0';
+      toEl.classList.remove('below', 'above', 'hidden');
+      toEl.classList.add('active');
+      // Force reflow
+      toEl.offsetHeight;
+      toEl.style.transition = `transform ${duration}ms cubic-bezier(0.4, 0, 0.2, 1), opacity ${duration/2}ms ease`;
+      toEl.style.transform = 'translateY(0)';
+      toEl.style.opacity = '1';
+
+      await sleep(duration);
+      fromEl.classList.remove('active');
+      fromEl.classList.add('above');
+      fromEl.style.transform = '';
+      fromEl.style.opacity = '';
+
+    } else if (transition === 'fade') {
+      const duration = 300;
+      fromEl.style.transition = `opacity ${duration}ms linear`;
+      fromEl.style.opacity = '0';
+
+      toEl.style.transition = 'none';
+      toEl.style.opacity = '0';
+      toEl.classList.remove('below', 'above', 'hidden');
+      toEl.classList.add('active');
+      toEl.offsetHeight;
+      toEl.style.transition = `opacity ${duration}ms linear`;
+      toEl.style.opacity = '1';
+
+      await sleep(duration);
+      fromEl.classList.remove('active');
+      fromEl.classList.add('above');
+      fromEl.style.opacity = '';
+
+    } else if (transition === 'spring') {
+      // Spring animation: mass:1 stiffness:222 damping:3.7, duration ~3800ms
+      const springDuration = 3800;
+      // Exit current with a slight bounce
+      fromEl.style.transition = `transform 400ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease`;
+      fromEl.style.transform = 'translateY(-8px) scale(0.99)';
+      fromEl.style.opacity = '0.7';
+
+      // Enter target with spring
+      toEl.style.transition = 'none';
+      toEl.style.opacity = '0';
+      toEl.style.transform = 'translateY(20px) scale(0.98)';
+      toEl.classList.remove('below', 'above', 'hidden');
+      toEl.classList.add('active');
+      toEl.offsetHeight;
+
+      // Spring keyframes via WAAPI
+      const springAnim = toEl.animate([
+        { transform: 'translateY(20px) scale(0.98)', opacity: 0 },
+        { transform: 'translateY(-8px) scale(1.01)', opacity: 0.7, offset: 0.15 },
+        { transform: 'translateY(4px) scale(0.995)', opacity: 0.9, offset: 0.3 },
+        { transform: 'translateY(-2px) scale(1.002)', opacity: 0.95, offset: 0.5 },
+        { transform: 'translateY(1px) scale(0.999)', opacity: 0.98, offset: 0.7 },
+        { transform: 'translateY(0) scale(1)', opacity: 1, offset: 1 },
+      ], {
+        duration: springDuration,
+        easing: 'ease-out',
+        fill: 'forwards'
+      });
+
+      await sleep(springDuration);
+      springAnim.commitStyles();
+      springAnim.cancel();
+      toEl.style.transform = '';
+      toEl.style.opacity = '';
+
+      fromEl.classList.remove('active');
+      fromEl.classList.add('above');
+      fromEl.style.transform = '';
+      fromEl.style.opacity = '';
+
+    } else {
+      // Instant
+      fromEl.classList.remove('active');
+      fromEl.classList.add('above');
+      toEl.classList.remove('below', 'above', 'hidden');
+      toEl.classList.add('active');
+    }
+
+    currentScreen = targetIdx;
+    updateDots(currentScreen);
+    isAnimating = false;
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      navigateTo(currentScreen + 1, currentScreen === 1 || currentScreen === 0 ? 'push' : 'fade');
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      navigateTo(currentScreen - 1, 'fade');
+    }
+  });
+</script>
+
+</body>
+</html>

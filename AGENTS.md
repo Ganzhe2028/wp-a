@@ -89,6 +89,51 @@ Define completion criteria before starting. Verify against them before delivery.
 Never return unfinished work; fix issues and retest until the criteria are met
 or a genuine blocker requires user input.
 
+## Design Reference: Welcom👀n (Figma)
+
+The current UI design lives in Figma at `qHFGyH41gsFG4BQMHft8i0` (file name: "Welcom👀n"). A clickable HTML prototype is at `monk/index.html` — open it in browser and use ← → to navigate.
+
+### Figma data extraction methodology (2026-06-26)
+
+Two approaches, complementary:
+
+| Method | Gets | Misses |
+|--------|------|--------|
+| **REST API** (`/v1/files/:key`) | Node tree, absolute positions, RGBA colors, fonts, text content, prototype animations (trigger/easing/duration/spring params), image export | Auto Layout properties (layoutMode/gap/padding/align), component variants, variable bindings, mixed font sizes within text nodes |
+| **Plugin API** (local script at `/Users/mac/New/dump-layout/`) | All of the above + Auto Layout, component properties, variable bindings, per-character text styling | Only works on Figma desktop app |
+
+**This specific design uses NO Auto Layout** — all elements are manually positioned with FIXED sizing. This means padding/gap values must be derived from absolute coordinate math rather than read directly.
+
+### Design tokens extracted
+
+```
+Primary:    #FF530F  (orange-red, all buttons/circles)
+Background: #FFFFFF
+Card bg:    #F7F7F7
+Card border:#D9D9D9, 20px stroke
+Grey:       #E6E6E6, #EBEBEB (placeholders)
+Text dark:  #000000
+Text muted: #D9D9D9 (subtitles), #808080 (labels)
+Font EN:    Platform Medium, weight 500
+Font CN:    HYQiHei 80S, weight 400
+Corner radii: 75px (card frame), 30px (buttons/avatar), 20px (small buttons), 12px (placeholders)
+```
+
+### Page flow & animations
+
+```
+Splash → Welcome → Profile View → Edit → Edit v2 → Adjective
+  PUSH↑    PUSH↑      fade       spring    PUSH↑
+  2084ms   2084ms      300ms      3798ms    2084ms
+  SLOW     SLOW       LINEAR     CUSTOM_SPRING  SLOW
+```
+
+Spring parameters: mass:1, stiffness:222, damping:3.7 (underdamped bounce).
+
+### Prototype (`monk/index.html`)
+
+Self-contained HTML with all 6 screens. Click through or use arrow keys. Animations match Figma prototype timing and easing. No dependencies.
+
 ## Tech Stack (locked)
 
 Next.js App Router v15+, React, TypeScript, Prisma + Neon PostgreSQL, Cloudflare R2 (S3-compatible), Tailwind, browser-image-compression, nanoid, qrcode, jose. Deploy on Vercel behind Cloudflare DNS.
