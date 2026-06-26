@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { verifyStudentSession } from '@/lib/auth'
 import ImageGallery from './ImageGallery'
+import FavoriteButton from '@/app/loc/[code]/FavoriteButton'
 
 interface PageProps {
   params: Promise<{ code: string }>
@@ -19,6 +22,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProfilePage({ params }: PageProps) {
   const { code } = await params
+
+  const session = await verifyStudentSession();
+  if (!session) {
+    redirect('/?next=' + encodeURIComponent('/u/' + code));
+  }
 
   const person = await prisma.person.findUnique({
     where: { code },
@@ -63,7 +71,22 @@ export default async function ProfilePage({ params }: PageProps) {
     )
   }
 
-  const displayImages = person.images.filter((img) => !img.hidden)
+  const displayImages = person.images.filter((img) => !img.hidden);
+
+  let initialFavorited = false;
+  if (session) {
+    const existing = await prisma.favorite.findUnique({
+      where: {
+        favoriterId_favoriteeId: {
+          favoriterId: session.personId,
+          favoriteeId: person.id,
+        },
+      },
+    });
+    initialFavorited = !!existing;
+  }
+
+  const showFavoriteButton = session && person && !person.hidden && person.published;
 
   return (
     <div className="min-h-screen bg-zinc-50">
@@ -114,6 +137,16 @@ export default async function ProfilePage({ params }: PageProps) {
           <p className="text-center text-sm text-zinc-700 leading-relaxed mb-8 whitespace-pre-line">
             {person.bio}
           </p>
+        )}
+
+        {showFavoriteButton && (
+          <div className="flex justify-center mb-8">
+            <FavoriteButton
+              code={person.code}
+              name={person.chineseName || person.englishName || code}
+              initialFavorited={initialFavorited}
+            />
+          </div>
         )}
 
         {displayImages.length > 0 && (

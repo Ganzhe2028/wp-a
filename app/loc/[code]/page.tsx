@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 import { prisma } from "@/lib/prisma";
+import { verifyStudentSession } from "@/lib/auth";
 import FavoriteButton from "./FavoriteButton";
 
 interface Props {
@@ -19,13 +21,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function LocationCardPage({ params }: Props) {
   const { code } = await params;
 
+  const session = await verifyStudentSession();
+  if (!session) {
+    redirect('/?next=' + encodeURIComponent('/loc/' + code));
+  }
+
   const location = await prisma.locationCard.findUnique({
     where: { code },
-    include: { person: { select: { chineseName: true, grade: true } } },
+    include: { person: { select: { id: true, chineseName: true, grade: true } } },
   });
 
   if (!location) {
     return <PlaceholderPage />;
+  }
+
+  let initialFavorited = false;
+  if (session && location.person) {
+    const existing = await prisma.favorite.findUnique({
+      where: {
+        favoriterId_favoriteeId: {
+          favoriterId: session.personId,
+          favoriteeId: location.person.id,
+        },
+      },
+    });
+    initialFavorited = !!existing;
   }
 
   return (
@@ -84,7 +104,11 @@ export default async function LocationCardPage({ params }: Props) {
 
           {/* Favorite */}
           <div className="flex justify-center">
-            <FavoriteButton code={location.code} name={location.name} />
+            <FavoriteButton
+              code={location.code}
+              name={location.name}
+              initialFavorited={initialFavorited}
+            />
           </div>
         </div>
       </div>

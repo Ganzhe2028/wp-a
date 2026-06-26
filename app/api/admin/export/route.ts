@@ -12,14 +12,14 @@ export async function GET(request: NextRequest) {
     orderBy: { createdAt: "asc" },
   });
 
-  const header = "chineseName,englishName,homepage,location,edit";
+  const header = "chineseName,englishName,username,homepage,location";
   const rows = persons.map((p: typeof persons[number]) =>
     [
       p.chineseName || "",
       p.englishName || "",
+      p.username || "",
       `${baseUrl}/u/${p.code}`,
       `${baseUrl}/loc/${p.code}`,
-      `${baseUrl}/edit/${p.editToken}`,
     ].join(",")
   );
 

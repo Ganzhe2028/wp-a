@@ -1,21 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyEditToken } from "@/lib/auth";
+import { verifyStudentSession } from "@/lib/auth";
 import { createPresignedUploadUrl, getPublicUrl } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 import { nanoid } from "nanoid";
 
 export async function POST(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get("token");
-  if (!token) {
-    return NextResponse.json({ error: "Token required" }, { status: 400 });
+  const session = await verifyStudentSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const auth = await verifyEditToken(token);
-  if (!auth) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+  let contentType: string;
+  try {
+    const body = await request.json();
+    contentType = body.contentType;
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
   }
 
-  const { contentType } = await request.json();
   if (!contentType) {
     return NextResponse.json(
       { error: "contentType required" },
@@ -32,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   const imageCount = await prisma.image.count({
-    where: { personId: auth.id, hidden: false },
+    where: { personId: session.personId, hidden: false },
   });
 
   if (imageCount >= 4) {
@@ -43,7 +48,7 @@ export async function POST(request: NextRequest) {
   }
 
   const ext = contentType.split("/")[1] || "webp";
-  const key = `${auth.id}/${nanoid()}.${ext}`;
+  const key = `${session.personId}/${nanoid()}.${ext}`;
 
   const putUrl = await createPresignedUploadUrl(key, contentType);
   const publicUrl = getPublicUrl(key);

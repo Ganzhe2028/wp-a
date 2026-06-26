@@ -28,18 +28,19 @@ interface ImageData {
 interface CreatedPerson {
   chineseName: string;
   code: string;
-  editToken: string;
+  username: string;
+  password: string;
 }
 
 interface ExportRow {
   chineseName: string;
   englishName: string;
+  username: string;
   homepage: string;
   location: string;
-  edit: string;
 }
 
-type TabId = "import" | "location" | "takedown" | "export" | "qr" | "settings";
+type TabId = "import" | "location" | "takedown" | "export" | "qr" | "settings" | "reset";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "import", label: "导入名单" },
@@ -48,6 +49,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "export", label: "导出" },
   { id: "qr", label: "QR 码" },
   { id: "settings", label: "系统设置" },
+  { id: "reset", label: "重置密码" },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -77,9 +79,9 @@ function parseExportCsv(text: string) {
     return {
       chineseName: parts[0] ?? "",
       englishName: parts[1] ?? "",
-      homepage: parts[2] ?? "",
-      location: parts[3] ?? "",
-      edit: parts[4] ?? "",
+      username: parts[2] ?? "",
+      homepage: parts[3] ?? "",
+      location: parts[4] ?? "",
     };
   });
 }
@@ -245,6 +247,7 @@ function Dashboard({ tab, onTabChange }: { tab: TabId; onTabChange: (t: TabId) =
         {tab === "export" && <ExportSection />}
         {tab === "qr" && <QRSection />}
         {tab === "settings" && <SettingsSection />}
+        {tab === "reset" && <ResetPasswordSection />}
       </main>
     </div>
   );
@@ -371,7 +374,8 @@ function ImportSection() {
                 <tr>
                   <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">姓名</th>
                   <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">短码</th>
-                  <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">编辑链接</th>
+                  <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">用户名</th>
+                  <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">密码</th>
                   <th className="px-2 py-2 sm:px-3" />
                 </tr>
               </thead>
@@ -380,16 +384,37 @@ function ImportSection() {
                   <tr key={p.code} className="bg-white dark:bg-zinc-900">
                     <td className="px-2 py-2 text-zinc-900 sm:px-3 dark:text-zinc-100">{p.chineseName}</td>
                     <td className="px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">{p.code}</td>
-                    <td className="max-w-[200px] truncate px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">
-                      {p.editToken}
-                    </td>
+                    <td className="px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">{p.username}</td>
+                    <td className="px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">{p.password}</td>
                     <td className="px-2 py-2 sm:px-3">
-                      <CopyButton value={window.location.origin + "/edit/" + p.editToken} label="复制链接" />
+                      <CopyButton value={p.password} label="复制密码" />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => {
+                const header = "name,code,username,password";
+                const rows = result.map((p) => `${p.chineseName},${p.code},${p.username},${p.password}`);
+                const csv = [header, ...rows].join("\n");
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "accounts.csv";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }}
+              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            >
+              下载帐密 CSV
+            </button>
           </div>
         </div>
       )}
@@ -716,9 +741,9 @@ function ExportSection() {
               <tr>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">中文名</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">英文名</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">用户名</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">主页</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">位置页</th>
-                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">编辑</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -727,6 +752,7 @@ function ExportSection() {
                 <tr key={"exp-" + i} className="bg-white dark:bg-zinc-900">
                   <td className="px-2 py-2 text-zinc-900 sm:px-3 dark:text-zinc-100">{r.chineseName}</td>
                   <td className="px-2 py-2 text-zinc-500 sm:px-3 dark:text-zinc-400">{r.englishName}</td>
+                  <td className="px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">{r.username}</td>
                   <td className="px-2 py-2 sm:px-3">
                     <span className="inline-flex items-center gap-1">
                       <CopyButton value={r.homepage} label="复制" />
@@ -737,12 +763,6 @@ function ExportSection() {
                     <span className="inline-flex items-center gap-1">
                       <CopyButton value={r.location} label="复制" />
                       <OpenLink href={r.location} />
-                    </span>
-                  </td>
-                  <td className="px-2 py-2 sm:px-3">
-                    <span className="inline-flex items-center gap-1">
-                      <CopyButton value={r.edit} label="复制" />
-                      <OpenLink href={r.edit} />
                     </span>
                   </td>
                 </tr>
@@ -985,6 +1005,88 @@ function SettingsSection() {
           {feedback.msg}
         </p>
       )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reset Password                                                     */
+/* ------------------------------------------------------------------ */
+
+function ResetPasswordSection() {
+  const [code, setCode] = useState("");
+  const [resetting, setResetting] = useState(false);
+  const [newPassword, setNewPassword] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!code.trim()) return;
+    setResetting(true);
+    setError("");
+    setNewPassword(null);
+    try {
+      const res = await fetch("/api/admin/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "重置失败");
+      } else {
+        setNewPassword(data.password);
+        setCode("");
+      }
+    } catch {
+      setError("网络错误");
+    } finally {
+      setResetting(false);
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">重置密码</h2>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        输入学生短码，为其重置登录密码。重置后新密码将在此显示一次，请及时保存。
+      </p>
+
+      <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
+        <div>
+          <label htmlFor="reset-code" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">学生短码</label>
+          <input
+            id="reset-code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="例如 abc123"
+            className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-zinc-400"
+          />
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        )}
+
+        {newPassword && (
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/50">
+            <p className="mb-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">新密码</p>
+            <p className="mb-3 font-mono text-base text-emerald-800 dark:text-emerald-200">{newPassword}</p>
+            <div className="flex items-center gap-2">
+              <CopyButton value={newPassword} label="复制密码" />
+            </div>
+            <p className="mt-3 text-xs text-amber-600 dark:text-amber-400">⚠ 此密码只显示一次，关闭后无法再次查看。</p>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={resetting || !code.trim()}
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-40 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        >
+          {resetting ? "重置中\u2026" : "重置密码"}
+        </button>
+      </form>
     </div>
   );
 }

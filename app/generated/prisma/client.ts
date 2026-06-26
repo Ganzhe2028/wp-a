@@ -64,6 +64,11 @@ export type Image = Prisma.ImageModel
  */
 export type LocationCard = Prisma.LocationCardModel
 /**
+ * Model Favorite
+ * 
+ */
+export type Favorite = Prisma.FavoriteModel
+/**
  * Model SystemSetting
  * 
  */

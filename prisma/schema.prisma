@@ -10,20 +10,24 @@ datasource db {
 }
 
 model Person {
-  id          String        @id @default(cuid())
-  code        String        @unique
-  editToken   String        @unique
-  englishName String?
-  chineseName String?
-  grade       String?
-  bio         String?
-  avatarUrl   String?
-  published   Boolean       @default(false)
-  hidden      Boolean       @default(false)
-  images      Image[]
-  location    LocationCard?
-  updatedAt   DateTime      @updatedAt
-  createdAt   DateTime      @default(now())
+  id           String        @id @default(cuid())
+  code         String        @unique
+  editToken    String        @unique
+  username     String        @unique
+  passwordHash String?
+  englishName  String?
+  chineseName  String?
+  grade        String?
+  bio          String?
+  avatarUrl    String?
+  published    Boolean       @default(false)
+  hidden       Boolean       @default(false)
+  images       Image[]
+  favoritesGiven    Favorite[] @relation("Favoriter")
+  favoritesReceived Favorite[] @relation("Favoritee")
+  location     LocationCard?
+  updatedAt    DateTime      @updatedAt
+  createdAt    DateTime      @default(now())
 }
 
 model Image {
@@ -47,6 +51,18 @@ model LocationCard {
   room      String
   seat      String
   updatedAt DateTime @updatedAt
+}
+
+model Favorite {
+  id          String   @id @default(cuid())
+  favoriterId String
+  favoriteeId String
+  favoriter   Person   @relation("Favoriter", fields: [favoriterId], references: [id], onDelete: Cascade)
+  favoritee   Person   @relation("Favoritee", fields: [favoriteeId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([favoriterId, favoriteeId])
+  @@index([favoriterId])
 }
 
 model SystemSetting {

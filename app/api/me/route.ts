@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyEditToken } from "@/lib/auth";
+import { verifyStudentSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get("token");
-  if (!token) {
-    return NextResponse.json({ error: "Token required" }, { status: 400 });
-  }
-
-  const auth = await verifyEditToken(token);
-  if (!auth) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+  const session = await verifyStudentSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const person = await prisma.person.findUnique({
-    where: { id: auth.id },
+    where: { id: session.personId },
     include: { images: { orderBy: { sort: "asc" } } },
   });
 
@@ -22,21 +17,14 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get("token");
-  if (!token) {
-    return NextResponse.json({ error: "Token required" }, { status: 400 });
-  }
-
-  const auth = await verifyEditToken(token);
-  if (!auth) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+  const session = await verifyStudentSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await request.json();
   const { englishName, chineseName, grade, bio, avatarUrl, published } = body;
 
-  // Block publish control only if admin has explicitly disabled it
-  // Default: allowed (no setting or value not "false" → OK)
   if (published === true) {
     const setting = await prisma.systemSetting.findUnique({
       where: { key: "allowStudentPublishControl" },
@@ -62,7 +50,7 @@ export async function PATCH(request: NextRequest) {
 
   if (published === true) {
     const person = await prisma.person.findUnique({
-      where: { id: auth.id },
+      where: { id: session.personId },
       select: { avatarUrl: true },
     });
     const hasAvatar = body.avatarUrl || person?.avatarUrl;
@@ -75,7 +63,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const updated = await prisma.person.update({
-    where: { id: auth.id },
+    where: { id: session.personId },
     data: {
       ...(englishName !== undefined && { englishName }),
       ...(chineseName !== undefined && { chineseName }),

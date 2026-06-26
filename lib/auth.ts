@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 const ADMIN_SECRET = new TextEncoder().encode(
   process.env.ADMIN_PASSWORD || "change-me-in-production"
@@ -54,4 +55,71 @@ export async function verifyEditToken(
     select: { id: true },
   });
   return person ?? null;
+}
+
+// ── Password Hashing (node:crypto scrypt) ──
+
+export function hashPassword(plain: string): string {
+  const salt = randomBytes(16);
+  const hash = scryptSync(plain, salt, 64);
+  return `${salt.toString("hex")}:${hash.toString("hex")}`;
+}
+
+export function verifyPassword(plain: string, stored: string): boolean {
+  const [saltHex, hashHex] = stored.split(":");
+  if (!saltHex || !hashHex) return false;
+  const salt = Buffer.from(saltHex, "hex");
+  const expected = Buffer.from(hashHex, "hex");
+  const actual = scryptSync(plain, salt, expected.length);
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
+}
+
+// ── Student Session (JWT, httpOnly cookie, 14d) ──
+
+const SESSION_SECRET = new TextEncoder().encode(
+  process.env.SESSION_SECRET || "change-me-in-production"
+);
+const SESSION_COOKIE = "owk_session";
+const SESSION_MAX_AGE = 60 * 60 * 24 * 14; // 14 days
+
+export async function createStudentSession(personId: string): Promise<string> {
+  return new SignJWT({ pid: personId, role: "student" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("14d")
+    .sign(SESSION_SECRET);
+}
+
+export async function verifyStudentSession(): Promise<{ personId: string } | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+  try {
+    const { payload } = await jwtVerify(token, SESSION_SECRET);
+    return { personId: payload.pid as string };
+  } catch {
+    return null;
+  }
+}
+
+export function setStudentCookie(token: string) {
+  return {
+    name: SESSION_COOKIE,
+    value: token,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: SESSION_MAX_AGE,
+  };
+}
+
+export function clearStudentCookie() {
+  return {
+    name: SESSION_COOKIE,
+    value: "",
+    httpOnly: true,
+    path: "/",
+    maxAge: 0,
+  };
 }

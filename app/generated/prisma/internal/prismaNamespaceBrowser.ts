@@ -52,6 +52,7 @@ export const ModelName = {
   Person: 'Person',
   Image: 'Image',
   LocationCard: 'LocationCard',
+  Favorite: 'Favorite',
   SystemSetting: 'SystemSetting'
 } as const
 
@@ -75,6 +76,8 @@ export const PersonScalarFieldEnum = {
   id: 'id',
   code: 'code',
   editToken: 'editToken',
+  username: 'username',
+  passwordHash: 'passwordHash',
   englishName: 'englishName',
   chineseName: 'chineseName',
   grade: 'grade',
@@ -114,6 +117,16 @@ export const LocationCardScalarFieldEnum = {
 } as const
 
 export type LocationCardScalarFieldEnum = (typeof LocationCardScalarFieldEnum)[keyof typeof LocationCardScalarFieldEnum]
+
+
+export const FavoriteScalarFieldEnum = {
+  id: 'id',
+  favoriterId: 'favoriterId',
+  favoriteeId: 'favoriteeId',
+  createdAt: 'createdAt'
+} as const
+
+export type FavoriteScalarFieldEnum = (typeof FavoriteScalarFieldEnum)[keyof typeof FavoriteScalarFieldEnum]
 
 
 export const SystemSettingScalarFieldEnum = {

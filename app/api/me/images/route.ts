@@ -1,17 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyEditToken } from "@/lib/auth";
+import { verifyStudentSession } from "@/lib/auth";
 import { deleteFromR2 } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get("token");
-  if (!token) {
-    return NextResponse.json({ error: "Token required" }, { status: 400 });
-  }
-
-  const auth = await verifyEditToken(token);
-  if (!auth) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+  const session = await verifyStudentSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { url, key } = await request.json();
@@ -23,7 +18,7 @@ export async function POST(request: NextRequest) {
   }
 
   const imageCount = await prisma.image.count({
-    where: { personId: auth.id, hidden: false },
+    where: { personId: session.personId, hidden: false },
   });
 
   if (imageCount >= 4) {
@@ -34,13 +29,13 @@ export async function POST(request: NextRequest) {
   }
 
   const maxSort = await prisma.image.aggregate({
-    where: { personId: auth.id },
+    where: { personId: session.personId },
     _max: { sort: true },
   });
 
   const image = await prisma.image.create({
     data: {
-      personId: auth.id,
+      personId: session.personId,
       url,
       key,
       sort: (maxSort._max.sort ?? -1) + 1,
@@ -51,22 +46,21 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get("token");
+  const session = await verifyStudentSession();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const id = request.nextUrl.searchParams.get("id");
-  if (!token || !id) {
+  if (!id) {
     return NextResponse.json(
-      { error: "token and id required" },
+      { error: "id required" },
       { status: 400 }
     );
   }
 
-  const auth = await verifyEditToken(token);
-  if (!auth) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 403 });
-  }
-
   const image = await prisma.image.findUnique({ where: { id } });
-  if (!image || image.personId !== auth.id) {
+  if (!image || image.personId !== session.personId) {
     return NextResponse.json({ error: "Image not found" }, { status: 404 });
   }
 

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/auth";
-import { createUniqueCode, createUniqueEditToken } from "@/lib/code";
+import { createUniqueCode, createUniqueEditToken, newPlainPassword } from "@/lib/code";
+import { hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 interface ImportRow {
   englishName?: string;
   chineseName: string;
   grade?: string;
+  username?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -19,7 +21,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "rows array required" }, { status: 400 });
   }
 
-  const created: { chineseName: string; code: string; editToken: string }[] =
+  const created: { chineseName: string; code: string; username: string; password: string }[] =
     [];
 
   for (const row of rows) {
@@ -27,11 +29,16 @@ export async function POST(request: NextRequest) {
 
     const code = await createUniqueCode();
     const editToken = await createUniqueEditToken();
+    const username = row.username || code;
+    const plainPassword = newPlainPassword();
+    const passwordHash = hashPassword(plainPassword);
 
-    const person = await prisma.person.create({
+    await prisma.person.create({
       data: {
         code,
         editToken,
+        username,
+        passwordHash,
         englishName: row.englishName || null,
         chineseName: row.chineseName,
         grade: row.grade || null,
@@ -48,9 +55,10 @@ export async function POST(request: NextRequest) {
     });
 
     created.push({
-      chineseName: person.chineseName!,
-      code: person.code,
-      editToken: person.editToken,
+      chineseName: row.chineseName,
+      code,
+      username,
+      password: plainPassword,
     });
   }
 

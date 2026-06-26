@@ -28,6 +28,8 @@ export type PersonMinAggregateOutputType = {
   id: string | null
   code: string | null
   editToken: string | null
+  username: string | null
+  passwordHash: string | null
   englishName: string | null
   chineseName: string | null
   grade: string | null
@@ -43,6 +45,8 @@ export type PersonMaxAggregateOutputType = {
   id: string | null
   code: string | null
   editToken: string | null
+  username: string | null
+  passwordHash: string | null
   englishName: string | null
   chineseName: string | null
   grade: string | null
@@ -58,6 +62,8 @@ export type PersonCountAggregateOutputType = {
   id: number
   code: number
   editToken: number
+  username: number
+  passwordHash: number
   englishName: number
   chineseName: number
   grade: number
@@ -75,6 +81,8 @@ export type PersonMinAggregateInputType = {
   id?: true
   code?: true
   editToken?: true
+  username?: true
+  passwordHash?: true
   englishName?: true
   chineseName?: true
   grade?: true
@@ -90,6 +98,8 @@ export type PersonMaxAggregateInputType = {
   id?: true
   code?: true
   editToken?: true
+  username?: true
+  passwordHash?: true
   englishName?: true
   chineseName?: true
   grade?: true
@@ -105,6 +115,8 @@ export type PersonCountAggregateInputType = {
   id?: true
   code?: true
   editToken?: true
+  username?: true
+  passwordHash?: true
   englishName?: true
   chineseName?: true
   grade?: true
@@ -193,6 +205,8 @@ export type PersonGroupByOutputType = {
   id: string
   code: string
   editToken: string
+  username: string
+  passwordHash: string | null
   englishName: string | null
   chineseName: string | null
   grade: string | null
@@ -229,6 +243,8 @@ export type PersonWhereInput = {
   id?: Prisma.StringFilter<"Person"> | string
   code?: Prisma.StringFilter<"Person"> | string
   editToken?: Prisma.StringFilter<"Person"> | string
+  username?: Prisma.StringFilter<"Person"> | string
+  passwordHash?: Prisma.StringNullableFilter<"Person"> | string | null
   englishName?: Prisma.StringNullableFilter<"Person"> | string | null
   chineseName?: Prisma.StringNullableFilter<"Person"> | string | null
   grade?: Prisma.StringNullableFilter<"Person"> | string | null
@@ -239,6 +255,8 @@ export type PersonWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   images?: Prisma.ImageListRelationFilter
+  favoritesGiven?: Prisma.FavoriteListRelationFilter
+  favoritesReceived?: Prisma.FavoriteListRelationFilter
   location?: Prisma.XOR<Prisma.LocationCardNullableScalarRelationFilter, Prisma.LocationCardWhereInput> | null
 }
 
@@ -246,6 +264,8 @@ export type PersonOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   editToken?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   englishName?: Prisma.SortOrderInput | Prisma.SortOrder
   chineseName?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -256,6 +276,8 @@ export type PersonOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   images?: Prisma.ImageOrderByRelationAggregateInput
+  favoritesGiven?: Prisma.FavoriteOrderByRelationAggregateInput
+  favoritesReceived?: Prisma.FavoriteOrderByRelationAggregateInput
   location?: Prisma.LocationCardOrderByWithRelationInput
 }
 
@@ -263,9 +285,11 @@ export type PersonWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   code?: string
   editToken?: string
+  username?: string
   AND?: Prisma.PersonWhereInput | Prisma.PersonWhereInput[]
   OR?: Prisma.PersonWhereInput[]
   NOT?: Prisma.PersonWhereInput | Prisma.PersonWhereInput[]
+  passwordHash?: Prisma.StringNullableFilter<"Person"> | string | null
   englishName?: Prisma.StringNullableFilter<"Person"> | string | null
   chineseName?: Prisma.StringNullableFilter<"Person"> | string | null
   grade?: Prisma.StringNullableFilter<"Person"> | string | null
@@ -276,13 +300,17 @@ export type PersonWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   images?: Prisma.ImageListRelationFilter
+  favoritesGiven?: Prisma.FavoriteListRelationFilter
+  favoritesReceived?: Prisma.FavoriteListRelationFilter
   location?: Prisma.XOR<Prisma.LocationCardNullableScalarRelationFilter, Prisma.LocationCardWhereInput> | null
-}, "id" | "code" | "editToken">
+}, "id" | "code" | "editToken" | "username">
 
 export type PersonOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   editToken?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   englishName?: Prisma.SortOrderInput | Prisma.SortOrder
   chineseName?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -304,6 +332,8 @@ export type PersonScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Person"> | string
   code?: Prisma.StringWithAggregatesFilter<"Person"> | string
   editToken?: Prisma.StringWithAggregatesFilter<"Person"> | string
+  username?: Prisma.StringWithAggregatesFilter<"Person"> | string
+  passwordHash?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
   englishName?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
   chineseName?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
   grade?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
@@ -319,6 +349,8 @@ export type PersonCreateInput = {
   id?: string
   code: string
   editToken: string
+  username: string
+  passwordHash?: string | null
   englishName?: string | null
   chineseName?: string | null
   grade?: string | null
@@ -329,6 +361,8 @@ export type PersonCreateInput = {
   updatedAt?: Date | string
   createdAt?: Date | string
   images?: Prisma.ImageCreateNestedManyWithoutPersonInput
+  favoritesGiven?: Prisma.FavoriteCreateNestedManyWithoutFavoriterInput
+  favoritesReceived?: Prisma.FavoriteCreateNestedManyWithoutFavoriteeInput
   location?: Prisma.LocationCardCreateNestedOneWithoutPersonInput
 }
 
@@ -336,6 +370,8 @@ export type PersonUncheckedCreateInput = {
   id?: string
   code: string
   editToken: string
+  username: string
+  passwordHash?: string | null
   englishName?: string | null
   chineseName?: string | null
   grade?: string | null
@@ -346,6 +382,8 @@ export type PersonUncheckedCreateInput = {
   updatedAt?: Date | string
   createdAt?: Date | string
   images?: Prisma.ImageUncheckedCreateNestedManyWithoutPersonInput
+  favoritesGiven?: Prisma.FavoriteUncheckedCreateNestedManyWithoutFavoriterInput
+  favoritesReceived?: Prisma.FavoriteUncheckedCreateNestedManyWithoutFavoriteeInput
   location?: Prisma.LocationCardUncheckedCreateNestedOneWithoutPersonInput
 }
 
@@ -353,6 +391,8 @@ export type PersonUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -363,6 +403,8 @@ export type PersonUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.ImageUpdateManyWithoutPersonNestedInput
+  favoritesGiven?: Prisma.FavoriteUpdateManyWithoutFavoriterNestedInput
+  favoritesReceived?: Prisma.FavoriteUpdateManyWithoutFavoriteeNestedInput
   location?: Prisma.LocationCardUpdateOneWithoutPersonNestedInput
 }
 
@@ -370,6 +412,8 @@ export type PersonUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -380,6 +424,8 @@ export type PersonUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.ImageUncheckedUpdateManyWithoutPersonNestedInput
+  favoritesGiven?: Prisma.FavoriteUncheckedUpdateManyWithoutFavoriterNestedInput
+  favoritesReceived?: Prisma.FavoriteUncheckedUpdateManyWithoutFavoriteeNestedInput
   location?: Prisma.LocationCardUncheckedUpdateOneWithoutPersonNestedInput
 }
 
@@ -387,6 +433,8 @@ export type PersonCreateManyInput = {
   id?: string
   code: string
   editToken: string
+  username: string
+  passwordHash?: string | null
   englishName?: string | null
   chineseName?: string | null
   grade?: string | null
@@ -402,6 +450,8 @@ export type PersonUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -417,6 +467,8 @@ export type PersonUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -432,6 +484,8 @@ export type PersonCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   editToken?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrder
   englishName?: Prisma.SortOrder
   chineseName?: Prisma.SortOrder
   grade?: Prisma.SortOrder
@@ -447,6 +501,8 @@ export type PersonMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   editToken?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrder
   englishName?: Prisma.SortOrder
   chineseName?: Prisma.SortOrder
   grade?: Prisma.SortOrder
@@ -462,6 +518,8 @@ export type PersonMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
   editToken?: Prisma.SortOrder
+  username?: Prisma.SortOrder
+  passwordHash?: Prisma.SortOrder
   englishName?: Prisma.SortOrder
   chineseName?: Prisma.SortOrder
   grade?: Prisma.SortOrder
@@ -522,10 +580,40 @@ export type PersonUpdateOneRequiredWithoutLocationNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PersonUpdateToOneWithWhereWithoutLocationInput, Prisma.PersonUpdateWithoutLocationInput>, Prisma.PersonUncheckedUpdateWithoutLocationInput>
 }
 
+export type PersonCreateNestedOneWithoutFavoritesGivenInput = {
+  create?: Prisma.XOR<Prisma.PersonCreateWithoutFavoritesGivenInput, Prisma.PersonUncheckedCreateWithoutFavoritesGivenInput>
+  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutFavoritesGivenInput
+  connect?: Prisma.PersonWhereUniqueInput
+}
+
+export type PersonCreateNestedOneWithoutFavoritesReceivedInput = {
+  create?: Prisma.XOR<Prisma.PersonCreateWithoutFavoritesReceivedInput, Prisma.PersonUncheckedCreateWithoutFavoritesReceivedInput>
+  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutFavoritesReceivedInput
+  connect?: Prisma.PersonWhereUniqueInput
+}
+
+export type PersonUpdateOneRequiredWithoutFavoritesGivenNestedInput = {
+  create?: Prisma.XOR<Prisma.PersonCreateWithoutFavoritesGivenInput, Prisma.PersonUncheckedCreateWithoutFavoritesGivenInput>
+  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutFavoritesGivenInput
+  upsert?: Prisma.PersonUpsertWithoutFavoritesGivenInput
+  connect?: Prisma.PersonWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PersonUpdateToOneWithWhereWithoutFavoritesGivenInput, Prisma.PersonUpdateWithoutFavoritesGivenInput>, Prisma.PersonUncheckedUpdateWithoutFavoritesGivenInput>
+}
+
+export type PersonUpdateOneRequiredWithoutFavoritesReceivedNestedInput = {
+  create?: Prisma.XOR<Prisma.PersonCreateWithoutFavoritesReceivedInput, Prisma.PersonUncheckedCreateWithoutFavoritesReceivedInput>
+  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutFavoritesReceivedInput
+  upsert?: Prisma.PersonUpsertWithoutFavoritesReceivedInput
+  connect?: Prisma.PersonWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PersonUpdateToOneWithWhereWithoutFavoritesReceivedInput, Prisma.PersonUpdateWithoutFavoritesReceivedInput>, Prisma.PersonUncheckedUpdateWithoutFavoritesReceivedInput>
+}
+
 export type PersonCreateWithoutImagesInput = {
   id?: string
   code: string
   editToken: string
+  username: string
+  passwordHash?: string | null
   englishName?: string | null
   chineseName?: string | null
   grade?: string | null
@@ -535,6 +623,8 @@ export type PersonCreateWithoutImagesInput = {
   hidden?: boolean
   updatedAt?: Date | string
   createdAt?: Date | string
+  favoritesGiven?: Prisma.FavoriteCreateNestedManyWithoutFavoriterInput
+  favoritesReceived?: Prisma.FavoriteCreateNestedManyWithoutFavoriteeInput
   location?: Prisma.LocationCardCreateNestedOneWithoutPersonInput
 }
 
@@ -542,6 +632,8 @@ export type PersonUncheckedCreateWithoutImagesInput = {
   id?: string
   code: string
   editToken: string
+  username: string
+  passwordHash?: string | null
   englishName?: string | null
   chineseName?: string | null
   grade?: string | null
@@ -551,6 +643,8 @@ export type PersonUncheckedCreateWithoutImagesInput = {
   hidden?: boolean
   updatedAt?: Date | string
   createdAt?: Date | string
+  favoritesGiven?: Prisma.FavoriteUncheckedCreateNestedManyWithoutFavoriterInput
+  favoritesReceived?: Prisma.FavoriteUncheckedCreateNestedManyWithoutFavoriteeInput
   location?: Prisma.LocationCardUncheckedCreateNestedOneWithoutPersonInput
 }
 
@@ -574,6 +668,8 @@ export type PersonUpdateWithoutImagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -583,6 +679,8 @@ export type PersonUpdateWithoutImagesInput = {
   hidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  favoritesGiven?: Prisma.FavoriteUpdateManyWithoutFavoriterNestedInput
+  favoritesReceived?: Prisma.FavoriteUpdateManyWithoutFavoriteeNestedInput
   location?: Prisma.LocationCardUpdateOneWithoutPersonNestedInput
 }
 
@@ -590,6 +688,8 @@ export type PersonUncheckedUpdateWithoutImagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -599,6 +699,8 @@ export type PersonUncheckedUpdateWithoutImagesInput = {
   hidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  favoritesGiven?: Prisma.FavoriteUncheckedUpdateManyWithoutFavoriterNestedInput
+  favoritesReceived?: Prisma.FavoriteUncheckedUpdateManyWithoutFavoriteeNestedInput
   location?: Prisma.LocationCardUncheckedUpdateOneWithoutPersonNestedInput
 }
 
@@ -606,6 +708,8 @@ export type PersonCreateWithoutLocationInput = {
   id?: string
   code: string
   editToken: string
+  username: string
+  passwordHash?: string | null
   englishName?: string | null
   chineseName?: string | null
   grade?: string | null
@@ -616,12 +720,16 @@ export type PersonCreateWithoutLocationInput = {
   updatedAt?: Date | string
   createdAt?: Date | string
   images?: Prisma.ImageCreateNestedManyWithoutPersonInput
+  favoritesGiven?: Prisma.FavoriteCreateNestedManyWithoutFavoriterInput
+  favoritesReceived?: Prisma.FavoriteCreateNestedManyWithoutFavoriteeInput
 }
 
 export type PersonUncheckedCreateWithoutLocationInput = {
   id?: string
   code: string
   editToken: string
+  username: string
+  passwordHash?: string | null
   englishName?: string | null
   chineseName?: string | null
   grade?: string | null
@@ -632,6 +740,8 @@ export type PersonUncheckedCreateWithoutLocationInput = {
   updatedAt?: Date | string
   createdAt?: Date | string
   images?: Prisma.ImageUncheckedCreateNestedManyWithoutPersonInput
+  favoritesGiven?: Prisma.FavoriteUncheckedCreateNestedManyWithoutFavoriterInput
+  favoritesReceived?: Prisma.FavoriteUncheckedCreateNestedManyWithoutFavoriteeInput
 }
 
 export type PersonCreateOrConnectWithoutLocationInput = {
@@ -654,6 +764,8 @@ export type PersonUpdateWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -664,12 +776,16 @@ export type PersonUpdateWithoutLocationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.ImageUpdateManyWithoutPersonNestedInput
+  favoritesGiven?: Prisma.FavoriteUpdateManyWithoutFavoriterNestedInput
+  favoritesReceived?: Prisma.FavoriteUpdateManyWithoutFavoriteeNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutLocationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -680,6 +796,200 @@ export type PersonUncheckedUpdateWithoutLocationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   images?: Prisma.ImageUncheckedUpdateManyWithoutPersonNestedInput
+  favoritesGiven?: Prisma.FavoriteUncheckedUpdateManyWithoutFavoriterNestedInput
+  favoritesReceived?: Prisma.FavoriteUncheckedUpdateManyWithoutFavoriteeNestedInput
+}
+
+export type PersonCreateWithoutFavoritesGivenInput = {
+  id?: string
+  code: string
+  editToken: string
+  username: string
+  passwordHash?: string | null
+  englishName?: string | null
+  chineseName?: string | null
+  grade?: string | null
+  bio?: string | null
+  avatarUrl?: string | null
+  published?: boolean
+  hidden?: boolean
+  updatedAt?: Date | string
+  createdAt?: Date | string
+  images?: Prisma.ImageCreateNestedManyWithoutPersonInput
+  favoritesReceived?: Prisma.FavoriteCreateNestedManyWithoutFavoriteeInput
+  location?: Prisma.LocationCardCreateNestedOneWithoutPersonInput
+}
+
+export type PersonUncheckedCreateWithoutFavoritesGivenInput = {
+  id?: string
+  code: string
+  editToken: string
+  username: string
+  passwordHash?: string | null
+  englishName?: string | null
+  chineseName?: string | null
+  grade?: string | null
+  bio?: string | null
+  avatarUrl?: string | null
+  published?: boolean
+  hidden?: boolean
+  updatedAt?: Date | string
+  createdAt?: Date | string
+  images?: Prisma.ImageUncheckedCreateNestedManyWithoutPersonInput
+  favoritesReceived?: Prisma.FavoriteUncheckedCreateNestedManyWithoutFavoriteeInput
+  location?: Prisma.LocationCardUncheckedCreateNestedOneWithoutPersonInput
+}
+
+export type PersonCreateOrConnectWithoutFavoritesGivenInput = {
+  where: Prisma.PersonWhereUniqueInput
+  create: Prisma.XOR<Prisma.PersonCreateWithoutFavoritesGivenInput, Prisma.PersonUncheckedCreateWithoutFavoritesGivenInput>
+}
+
+export type PersonCreateWithoutFavoritesReceivedInput = {
+  id?: string
+  code: string
+  editToken: string
+  username: string
+  passwordHash?: string | null
+  englishName?: string | null
+  chineseName?: string | null
+  grade?: string | null
+  bio?: string | null
+  avatarUrl?: string | null
+  published?: boolean
+  hidden?: boolean
+  updatedAt?: Date | string
+  createdAt?: Date | string
+  images?: Prisma.ImageCreateNestedManyWithoutPersonInput
+  favoritesGiven?: Prisma.FavoriteCreateNestedManyWithoutFavoriterInput
+  location?: Prisma.LocationCardCreateNestedOneWithoutPersonInput
+}
+
+export type PersonUncheckedCreateWithoutFavoritesReceivedInput = {
+  id?: string
+  code: string
+  editToken: string
+  username: string
+  passwordHash?: string | null
+  englishName?: string | null
+  chineseName?: string | null
+  grade?: string | null
+  bio?: string | null
+  avatarUrl?: string | null
+  published?: boolean
+  hidden?: boolean
+  updatedAt?: Date | string
+  createdAt?: Date | string
+  images?: Prisma.ImageUncheckedCreateNestedManyWithoutPersonInput
+  favoritesGiven?: Prisma.FavoriteUncheckedCreateNestedManyWithoutFavoriterInput
+  location?: Prisma.LocationCardUncheckedCreateNestedOneWithoutPersonInput
+}
+
+export type PersonCreateOrConnectWithoutFavoritesReceivedInput = {
+  where: Prisma.PersonWhereUniqueInput
+  create: Prisma.XOR<Prisma.PersonCreateWithoutFavoritesReceivedInput, Prisma.PersonUncheckedCreateWithoutFavoritesReceivedInput>
+}
+
+export type PersonUpsertWithoutFavoritesGivenInput = {
+  update: Prisma.XOR<Prisma.PersonUpdateWithoutFavoritesGivenInput, Prisma.PersonUncheckedUpdateWithoutFavoritesGivenInput>
+  create: Prisma.XOR<Prisma.PersonCreateWithoutFavoritesGivenInput, Prisma.PersonUncheckedCreateWithoutFavoritesGivenInput>
+  where?: Prisma.PersonWhereInput
+}
+
+export type PersonUpdateToOneWithWhereWithoutFavoritesGivenInput = {
+  where?: Prisma.PersonWhereInput
+  data: Prisma.XOR<Prisma.PersonUpdateWithoutFavoritesGivenInput, Prisma.PersonUncheckedUpdateWithoutFavoritesGivenInput>
+}
+
+export type PersonUpdateWithoutFavoritesGivenInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  hidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.ImageUpdateManyWithoutPersonNestedInput
+  favoritesReceived?: Prisma.FavoriteUpdateManyWithoutFavoriteeNestedInput
+  location?: Prisma.LocationCardUpdateOneWithoutPersonNestedInput
+}
+
+export type PersonUncheckedUpdateWithoutFavoritesGivenInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  hidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.ImageUncheckedUpdateManyWithoutPersonNestedInput
+  favoritesReceived?: Prisma.FavoriteUncheckedUpdateManyWithoutFavoriteeNestedInput
+  location?: Prisma.LocationCardUncheckedUpdateOneWithoutPersonNestedInput
+}
+
+export type PersonUpsertWithoutFavoritesReceivedInput = {
+  update: Prisma.XOR<Prisma.PersonUpdateWithoutFavoritesReceivedInput, Prisma.PersonUncheckedUpdateWithoutFavoritesReceivedInput>
+  create: Prisma.XOR<Prisma.PersonCreateWithoutFavoritesReceivedInput, Prisma.PersonUncheckedCreateWithoutFavoritesReceivedInput>
+  where?: Prisma.PersonWhereInput
+}
+
+export type PersonUpdateToOneWithWhereWithoutFavoritesReceivedInput = {
+  where?: Prisma.PersonWhereInput
+  data: Prisma.XOR<Prisma.PersonUpdateWithoutFavoritesReceivedInput, Prisma.PersonUncheckedUpdateWithoutFavoritesReceivedInput>
+}
+
+export type PersonUpdateWithoutFavoritesReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  hidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.ImageUpdateManyWithoutPersonNestedInput
+  favoritesGiven?: Prisma.FavoriteUpdateManyWithoutFavoriterNestedInput
+  location?: Prisma.LocationCardUpdateOneWithoutPersonNestedInput
+}
+
+export type PersonUncheckedUpdateWithoutFavoritesReceivedInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  editToken?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  chineseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  published?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  hidden?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  images?: Prisma.ImageUncheckedUpdateManyWithoutPersonNestedInput
+  favoritesGiven?: Prisma.FavoriteUncheckedUpdateManyWithoutFavoriterNestedInput
+  location?: Prisma.LocationCardUncheckedUpdateOneWithoutPersonNestedInput
 }
 
 
@@ -689,10 +999,14 @@ export type PersonUncheckedUpdateWithoutLocationInput = {
 
 export type PersonCountOutputType = {
   images: number
+  favoritesGiven: number
+  favoritesReceived: number
 }
 
 export type PersonCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   images?: boolean | PersonCountOutputTypeCountImagesArgs
+  favoritesGiven?: boolean | PersonCountOutputTypeCountFavoritesGivenArgs
+  favoritesReceived?: boolean | PersonCountOutputTypeCountFavoritesReceivedArgs
 }
 
 /**
@@ -712,11 +1026,27 @@ export type PersonCountOutputTypeCountImagesArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.ImageWhereInput
 }
 
+/**
+ * PersonCountOutputType without action
+ */
+export type PersonCountOutputTypeCountFavoritesGivenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FavoriteWhereInput
+}
+
+/**
+ * PersonCountOutputType without action
+ */
+export type PersonCountOutputTypeCountFavoritesReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.FavoriteWhereInput
+}
+
 
 export type PersonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   code?: boolean
   editToken?: boolean
+  username?: boolean
+  passwordHash?: boolean
   englishName?: boolean
   chineseName?: boolean
   grade?: boolean
@@ -727,6 +1057,8 @@ export type PersonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   updatedAt?: boolean
   createdAt?: boolean
   images?: boolean | Prisma.Person$imagesArgs<ExtArgs>
+  favoritesGiven?: boolean | Prisma.Person$favoritesGivenArgs<ExtArgs>
+  favoritesReceived?: boolean | Prisma.Person$favoritesReceivedArgs<ExtArgs>
   location?: boolean | Prisma.Person$locationArgs<ExtArgs>
   _count?: boolean | Prisma.PersonCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["person"]>
@@ -735,6 +1067,8 @@ export type PersonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   code?: boolean
   editToken?: boolean
+  username?: boolean
+  passwordHash?: boolean
   englishName?: boolean
   chineseName?: boolean
   grade?: boolean
@@ -750,6 +1084,8 @@ export type PersonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   id?: boolean
   code?: boolean
   editToken?: boolean
+  username?: boolean
+  passwordHash?: boolean
   englishName?: boolean
   chineseName?: boolean
   grade?: boolean
@@ -765,6 +1101,8 @@ export type PersonSelectScalar = {
   id?: boolean
   code?: boolean
   editToken?: boolean
+  username?: boolean
+  passwordHash?: boolean
   englishName?: boolean
   chineseName?: boolean
   grade?: boolean
@@ -776,9 +1114,11 @@ export type PersonSelectScalar = {
   createdAt?: boolean
 }
 
-export type PersonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "editToken" | "englishName" | "chineseName" | "grade" | "bio" | "avatarUrl" | "published" | "hidden" | "updatedAt" | "createdAt", ExtArgs["result"]["person"]>
+export type PersonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "editToken" | "username" | "passwordHash" | "englishName" | "chineseName" | "grade" | "bio" | "avatarUrl" | "published" | "hidden" | "updatedAt" | "createdAt", ExtArgs["result"]["person"]>
 export type PersonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   images?: boolean | Prisma.Person$imagesArgs<ExtArgs>
+  favoritesGiven?: boolean | Prisma.Person$favoritesGivenArgs<ExtArgs>
+  favoritesReceived?: boolean | Prisma.Person$favoritesReceivedArgs<ExtArgs>
   location?: boolean | Prisma.Person$locationArgs<ExtArgs>
   _count?: boolean | Prisma.PersonCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -789,12 +1129,16 @@ export type $PersonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name: "Person"
   objects: {
     images: Prisma.$ImagePayload<ExtArgs>[]
+    favoritesGiven: Prisma.$FavoritePayload<ExtArgs>[]
+    favoritesReceived: Prisma.$FavoritePayload<ExtArgs>[]
     location: Prisma.$LocationCardPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     code: string
     editToken: string
+    username: string
+    passwordHash: string | null
     englishName: string | null
     chineseName: string | null
     grade: string | null
@@ -1199,6 +1543,8 @@ readonly fields: PersonFieldRefs;
 export interface Prisma__PersonClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   images<T extends Prisma.Person$imagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Person$imagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  favoritesGiven<T extends Prisma.Person$favoritesGivenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Person$favoritesGivenArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FavoritePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  favoritesReceived<T extends Prisma.Person$favoritesReceivedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Person$favoritesReceivedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FavoritePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   location<T extends Prisma.Person$locationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Person$locationArgs<ExtArgs>>): Prisma.Prisma__LocationCardClient<runtime.Types.Result.GetResult<Prisma.$LocationCardPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1232,6 +1578,8 @@ export interface PersonFieldRefs {
   readonly id: Prisma.FieldRef<"Person", 'String'>
   readonly code: Prisma.FieldRef<"Person", 'String'>
   readonly editToken: Prisma.FieldRef<"Person", 'String'>
+  readonly username: Prisma.FieldRef<"Person", 'String'>
+  readonly passwordHash: Prisma.FieldRef<"Person", 'String'>
   readonly englishName: Prisma.FieldRef<"Person", 'String'>
   readonly chineseName: Prisma.FieldRef<"Person", 'String'>
   readonly grade: Prisma.FieldRef<"Person", 'String'>
@@ -1650,6 +1998,54 @@ export type Person$imagesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.ImageScalarFieldEnum | Prisma.ImageScalarFieldEnum[]
+}
+
+/**
+ * Person.favoritesGiven
+ */
+export type Person$favoritesGivenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Favorite
+   */
+  select?: Prisma.FavoriteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Favorite
+   */
+  omit?: Prisma.FavoriteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FavoriteInclude<ExtArgs> | null
+  where?: Prisma.FavoriteWhereInput
+  orderBy?: Prisma.FavoriteOrderByWithRelationInput | Prisma.FavoriteOrderByWithRelationInput[]
+  cursor?: Prisma.FavoriteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FavoriteScalarFieldEnum | Prisma.FavoriteScalarFieldEnum[]
+}
+
+/**
+ * Person.favoritesReceived
+ */
+export type Person$favoritesReceivedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Favorite
+   */
+  select?: Prisma.FavoriteSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Favorite
+   */
+  omit?: Prisma.FavoriteOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FavoriteInclude<ExtArgs> | null
+  where?: Prisma.FavoriteWhereInput
+  orderBy?: Prisma.FavoriteOrderByWithRelationInput | Prisma.FavoriteOrderByWithRelationInput[]
+  cursor?: Prisma.FavoriteWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.FavoriteScalarFieldEnum | Prisma.FavoriteScalarFieldEnum[]
 }
 
 /**

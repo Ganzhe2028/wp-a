@@ -11,5 +11,6 @@
 export type * from './models/Person'
 export type * from './models/Image'
 export type * from './models/LocationCard'
+export type * from './models/Favorite'
 export type * from './models/SystemSetting'
 export type * from './commonInputTypes'

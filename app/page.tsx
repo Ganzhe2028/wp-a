@@ -1,18 +1,44 @@
-export default function Home() {
+import { verifyStudentSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import LoginForm from "./LoginForm";
+
+export const metadata: Metadata = {
+  title: "OWeek 个人主页",
+};
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const session = await verifyStudentSession();
+  if (session) {
+    redirect("/me");
+  }
+
+  const { next } = await searchParams;
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-stone-50 px-4">
-      <h1 className="text-2xl font-bold tracking-tight text-stone-900">
-        OWeek 个人主页
-      </h1>
-      <p className="mt-2 text-sm text-stone-500">
-        新生主页系统 — 通过 NFC 或二维码访问 /u/&#123;code&#125; 和 /loc/&#123;code&#125;
-      </p>
-      <a
-        href="/admin"
-        className="mt-6 rounded-xl bg-stone-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-stone-700"
-      >
-        运营后台
-      </a>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-stone-50 to-stone-100 px-4">
+      <div className="w-full max-w-sm">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-bold tracking-tight text-stone-900">
+            OWeek 个人主页
+          </h1>
+          <p className="mt-2 text-sm text-stone-500">
+            登录后编辑你的主页，收藏你遇到的同学
+          </p>
+        </div>
+
+        <LoginForm next={next ?? null} />
+
+        <p className="mt-8 text-center text-xs text-stone-400">
+          <a href="/admin" className="underline hover:text-stone-600">
+            管理员入口
+          </a>
+        </p>
+      </div>
     </div>
   );
 }

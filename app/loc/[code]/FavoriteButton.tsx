@@ -1,56 +1,38 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 interface FavoriteButtonProps {
   code: string;
   name: string;
+  initialFavorited: boolean;
 }
 
-interface StoredItem {
-  code: string;
-  name: string;
-  savedAt: number;
-}
+export default function FavoriteButton({
+  code,
+  name,
+  initialFavorited,
+}: FavoriteButtonProps) {
+  const [isFavorited, setIsFavorited] = useState(initialFavorited);
 
-const STORAGE_KEY = "owk_collection";
+  const toggle = useCallback(async () => {
+    const previousState = isFavorited;
+    setIsFavorited(!previousState);
 
-function readStorage(): StoredItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as StoredItem[]) : [];
-  } catch {
-    return [];
-  }
-}
+    try {
+      const res = await fetch("/api/favorites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
 
-function writeStorage(items: StoredItem[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-}
-
-export default function FavoriteButton({ code, name }: FavoriteButtonProps) {
-  const [isFavorited, setIsFavorited] = useState(false);
-
-  useEffect(() => {
-    const items = readStorage();
-    setIsFavorited(items.some((item) => item.code === code));
-  }, [code]);
-
-  const toggle = useCallback(() => {
-    const items = readStorage();
-    const existing = items.findIndex((item) => item.code === code);
-
-    if (existing !== -1) {
-      items.splice(existing, 1);
-      writeStorage(items);
-      setIsFavorited(false);
-    } else {
-      items.push({ code, name, savedAt: Date.now() });
-      writeStorage(items);
-      setIsFavorited(true);
+      if (!res.ok) {
+        setIsFavorited(previousState);
+      }
+    } catch {
+      setIsFavorited(previousState);
     }
-  }, [code, name]);
+  }, [code, isFavorited]);
 
   return (
     <button

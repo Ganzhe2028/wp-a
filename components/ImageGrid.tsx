@@ -10,7 +10,7 @@ interface DisplayImage {
 }
 
 interface ImageGridProps {
-  token: string;
+  token?: string;
   images: DisplayImage[];
   onImagesChange: (images: DisplayImage[]) => void;
   disabled?: boolean;
@@ -46,7 +46,7 @@ export default function ImageGrid({
 
         const ext = compressed.type.split("/")[1] || "webp";
         const presignRes = await fetch(
-          `/api/upload-url?token=${token}`,
+          token ? `/api/upload-url?token=${token}` : '/api/upload-url',
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -68,7 +68,7 @@ export default function ImageGrid({
         });
 
         const saveRes = await fetch(
-          `/api/me/images?token=${token}`,
+          token ? `/api/me/images?token=${token}` : '/api/me/images',
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -95,7 +95,7 @@ export default function ImageGrid({
 
     try {
       const res = await fetch(
-        `/api/me/images?token=${token}&id=${imageId}`,
+        token ? `/api/me/images?token=${token}&id=${imageId}` : `/api/me/images?id=${imageId}`,
         { method: "DELETE" }
       );
       if (!res.ok) throw new Error("Delete failed");

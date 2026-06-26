@@ -25,3 +25,9 @@ export async function createUniqueEditToken(): Promise<string> {
   }
   throw new Error("Failed to generate unique edit token after 10 attempts");
 }
+
+const generatePassword = customAlphabet(ALPHABET, 6);
+
+export function newPlainPassword(): string {
+  return generatePassword();
+}
