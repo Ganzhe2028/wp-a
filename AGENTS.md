@@ -161,9 +161,6 @@ Production: `https://oweek26.vercel.app` (Vercel, auto-deploys from `main` branc
 3. **`dotenv` must be in `dependencies`** (not `devDependencies`).
 4. **No `postinstall` script** — generated client is committed directly.
 
-### Prisma migrate with existing data (2026-06-26)
-When adding a NOT NULL column to a table with existing rows, `prisma migrate dev` will fail because it can't generate a default. Use `prisma db execute` to add the column as nullable, backfill with `UPDATE`, then set NOT NULL + unique constraint manually. Create the migration file and `_prisma_migrations` record after the fact.
-
 ### Session cookie: server httpOnly only (2026-06-26)
 Session cookie (`owk_session`) must be set via server `Set-Cookie` header, never via `document.cookie` or localStorage. iOS Safari ITP caps script-set cookies to 7 days, but server-set httpOnly cookies are exempt. The app runs for 10+ days and a single login must survive the full event.
 
@@ -178,9 +175,6 @@ The original `v2.0` implementation rejected PATCH with 403 when `published` was 
 
 ### Two cookie systems are independent (2026-06-26)
 `owk_session` (student, 14d) and `owk_admin` (admin, 8h) share zero code beyond both using jose JWT. Don't merge them or reuse secrets between them.
-
-### editToken: keep generation, delete route (2026-06-26)
-`editToken` column is NOT NULL @unique in DB. `createUniqueEditToken()` must stay in `lib/code.ts` and the import route must continue generating it. Only delete: `/edit/[token]` page route, export's edit link column, admin page's editToken display.
 
 ### Cloudflare / Neon / R2 unaffected by auth changes
 The account system migration (v1.0→v2.0) does NOT affect: R2 presigned URL flow, Neon pooled/direct connection strings, Cloudflare DNS, or QR code generation. The only new env var is `SESSION_SECRET`.
