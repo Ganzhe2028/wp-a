@@ -36,6 +36,7 @@ interface ExportRow {
   chineseName: string;
   englishName: string;
   username: string;
+  code: string;
   homepage: string;
   location: string;
 }
@@ -80,8 +81,9 @@ function parseExportCsv(text: string) {
       chineseName: parts[0] ?? "",
       englishName: parts[1] ?? "",
       username: parts[2] ?? "",
-      homepage: parts[3] ?? "",
-      location: parts[4] ?? "",
+      code: parts[3] ?? "",
+      homepage: parts[4] ?? "",
+      location: parts[5] ?? "",
     };
   });
 }
@@ -244,7 +246,7 @@ function Dashboard({ tab, onTabChange }: { tab: TabId; onTabChange: (t: TabId) =
         {tab === "import" && <ImportSection />}
         {tab === "location" && <LocationSection />}
         {tab === "takedown" && <TakedownSection />}
-        {tab === "export" && <ExportSection />}
+        {tab === "export" && <ExportSection onTabChange={onTabChange} />}
         {tab === "qr" && <QRSection />}
         {tab === "settings" && <SettingsSection />}
         {tab === "reset" && <ResetPasswordSection />}
@@ -699,7 +701,7 @@ function TakedownSection() {
 /*  Export                                                             */
 /* ------------------------------------------------------------------ */
 
-function ExportSection() {
+function ExportSection({ onTabChange }: { onTabChange: (t: TabId) => void }) {
   const [rows, setRows] = useState<ExportRow[] | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -736,12 +738,13 @@ function ExportSection() {
 
       {rows && rows.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">
-          <table className="min-w-[700px] w-full text-left text-sm">
+          <table className="min-w-[800px] w-full text-left text-sm">
             <thead className="bg-zinc-100 dark:bg-zinc-800">
               <tr>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">中文名</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">英文名</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">用户名</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">密码</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">主页</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">位置页</th>
               </tr>
@@ -752,7 +755,25 @@ function ExportSection() {
                 <tr key={"exp-" + i} className="bg-white dark:bg-zinc-900">
                   <td className="px-2 py-2 text-zinc-900 sm:px-3 dark:text-zinc-100">{r.chineseName}</td>
                   <td className="px-2 py-2 text-zinc-500 sm:px-3 dark:text-zinc-400">{r.englishName}</td>
-                  <td className="px-2 py-2 font-mono text-xs text-zinc-500 sm:px-3 dark:text-zinc-400">{r.username}</td>
+                  <td className="px-2 py-2 sm:px-3">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">{r.username}</span>
+                      <CopyButton value={r.username} label="复制" />
+                    </span>
+                  </td>
+                  <td className="px-2 py-2 sm:px-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sessionStorage.setItem("reset-code", r.code);
+                        onTabChange("reset");
+                      }}
+                      className="rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-400"
+                      title="密码是 scrypt 哈希，无法查看明文。点击跳转重置密码。"
+                    >
+                      重置
+                    </button>
+                  </td>
                   <td className="px-2 py-2 sm:px-3">
                     <span className="inline-flex items-center gap-1">
                       <CopyButton value={r.homepage} label="复制" />
@@ -771,6 +792,10 @@ function ExportSection() {
           </table>
         </div>
       )}
+
+      <p className="text-xs text-zinc-400 dark:text-zinc-500">
+        密码采用 scrypt 单向哈希存储，无法导出明文。点击「重置」跳转到重置密码页面。
+      </p>
     </div>
   );
 }
@@ -1014,7 +1039,16 @@ function SettingsSection() {
 /* ------------------------------------------------------------------ */
 
 function ResetPasswordSection() {
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(() => {
+    if (typeof window !== "undefined") {
+      const prefill = sessionStorage.getItem("reset-code");
+      if (prefill) {
+        sessionStorage.removeItem("reset-code");
+        return prefill;
+      }
+    }
+    return "";
+  });
   const [resetting, setResetting] = useState(false);
   const [newPassword, setNewPassword] = useState<string | null>(null);
   const [error, setError] = useState("");

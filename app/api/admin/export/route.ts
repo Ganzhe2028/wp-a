@@ -12,12 +12,13 @@ export async function GET(request: NextRequest) {
     orderBy: { createdAt: "asc" },
   });
 
-  const header = "chineseName,englishName,username,homepage,location";
+  const header = "chineseName,englishName,username,code,homepage,location";
   const rows = persons.map((p: typeof persons[number]) =>
     [
       p.chineseName || "",
       p.englishName || "",
       p.username || "",
+      p.code,
       `${baseUrl}/u/${p.code}`,
       `${baseUrl}/loc/${p.code}`,
     ].join(",")
