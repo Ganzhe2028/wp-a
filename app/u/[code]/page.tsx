@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
@@ -113,11 +114,15 @@ export default async function ProfilePage({ params }: PageProps) {
         </div>
         <div className="flex justify-center mb-5">
           {person.avatarUrl ? (
-            <img
-              src={person.avatarUrl}
-              alt=""
-              className="w-24 h-24 rounded-full object-cover ring-2 ring-white shadow-md"
-            />
+            <div className="relative w-24 h-24 rounded-full overflow-hidden ring-2 ring-white shadow-md">
+              <Image
+                src={person.avatarUrl}
+                alt=""
+                fill
+                unoptimized
+                className="object-cover"
+              />
+            </div>
           ) : (
             <div className="w-24 h-24 rounded-full bg-zinc-200 flex items-center justify-center ring-2 ring-white shadow-md">
               <span className="text-2xl text-zinc-400 font-medium">?</span>

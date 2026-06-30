@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
+import Image from 'next/image'
 
 export interface LightboxImage {
   id: string
@@ -96,11 +97,13 @@ export default function ImageLightbox({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <img
+        <Image
           src={current.url}
           alt=""
-          className="max-w-full max-h-[85vh] object-contain rounded-lg select-none"
-          draggable={false}
+          unoptimized
+          width={1200}
+          height={1200}
+          className="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg select-none"
         />
       </div>
 

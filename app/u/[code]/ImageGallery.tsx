@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import ImageLightbox, { type LightboxImage } from './ImageLightbox'
 
 interface ImageGalleryProps {
@@ -29,14 +30,15 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
           <button
             key={img.id}
             type="button"
-            className="aspect-square overflow-hidden rounded-xl bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2"
+            className="relative aspect-square overflow-hidden rounded-xl bg-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-400 focus:ring-offset-2"
             onClick={() => setLightboxIndex(i)}
           >
-            <img
+            <Image
               src={img.url}
               alt=""
-              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-              loading="lazy"
+              fill
+              unoptimized
+              className="object-cover transition-transform duration-300 hover:scale-105"
             />
           </button>
         ))}

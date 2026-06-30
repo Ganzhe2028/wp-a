@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import imageCompression from "browser-image-compression";
 
 interface AvatarUploaderProps {
@@ -68,13 +69,15 @@ export default function AvatarUploader({
         type="button"
         onClick={() => fileInputRef.current?.click()}
         disabled={uploading || disabled}
-        className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-full bg-stone-100 ring-2 ring-stone-200 transition-colors disabled:opacity-50 ${disabled ? "cursor-default" : "hover:ring-teal-400"}`}
+        className={`relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-full bg-stone-100 ring-2 ring-stone-200 transition-colors disabled:opacity-50 ${disabled ? "cursor-default" : "hover:ring-teal-400"}`}
       >
         {currentUrl ? (
-          <img
+          <Image
             src={currentUrl}
             alt="Avatar"
-            className="h-full w-full object-cover"
+            fill
+            unoptimized
+            className="object-cover"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">

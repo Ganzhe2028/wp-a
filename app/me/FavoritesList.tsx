@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -96,11 +97,15 @@ function FavoritesListItems({ items }: { items: FavoriteItem[] }) {
             className="group flex items-center gap-4 rounded-xl border border-zinc-100 bg-white p-4 transition-colors hover:border-zinc-200 hover:bg-zinc-50 active:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/60 dark:active:bg-zinc-800"
           >
             {item.avatarUrl ? (
-              <img
-                src={item.avatarUrl}
-                alt=""
-                className="h-10 w-10 shrink-0 rounded-full object-cover"
-              />
+              <div className="relative h-10 w-10 shrink-0 rounded-full overflow-hidden">
+                <Image
+                  src={item.avatarUrl}
+                  alt=""
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+              </div>
             ) : (
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-200 to-rose-300 text-sm font-semibold text-white dark:from-amber-600 dark:to-rose-700">
                 {name.charAt(0)}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import imageCompression from "browser-image-compression";
 
 interface DisplayImage {
@@ -127,10 +128,12 @@ export default function ImageGrid({
         <div className="grid grid-cols-2 gap-2">
           {activeImages.map((img) => (
             <div key={img.id} className="group relative aspect-square overflow-hidden rounded-lg bg-stone-100">
-              <img
+              <Image
                 src={img.url}
                 alt=""
-                className="h-full w-full object-cover"
+                fill
+                unoptimized
+                className="object-cover"
               />
               {!disabled && (
                 <button

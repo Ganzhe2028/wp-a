@@ -2,6 +2,7 @@
 
 import { parseCsvRows, serializeCsv } from "@/lib/csv";
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -882,10 +883,12 @@ function TakedownSection() {
                     }
                     title={img.hidden ? "点击显示" : "点击隐藏"}
                   >
-                    <img
+                    <Image
                       src={img.url}
                       alt=""
-                      className="h-full w-full object-cover"
+                      fill
+                      unoptimized
+                      className="object-cover"
                     />
                     {img.hidden && (
                       <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/50 text-[10px] font-medium text-white">
