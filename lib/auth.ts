@@ -1,6 +1,5 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { prisma } from "@/lib/prisma";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
 const ADMIN_PASSWORD = getSecret("ADMIN_PASSWORD", 8);
@@ -54,16 +53,6 @@ export function clearAdminCookie() {
     path: "/",
     maxAge: 0,
   };
-}
-
-export async function verifyEditToken(
-  token: string
-): Promise<{ id: string } | null> {
-  const person = await prisma.person.findUnique({
-    where: { editToken: token },
-    select: { id: true },
-  });
-  return person ?? null;
 }
 
 // ── Password Hashing (node:crypto scrypt) ──

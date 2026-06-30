@@ -10,7 +10,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 interface Person {
   id: string;
   code: string;
-  editToken: string;
   englishName: string | null;
   chineseName: string | null;
   grade: string | null;
@@ -848,7 +847,7 @@ function TakedownSection() {
                     </code>
                   </div>
                   <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-                    {"已发布：" + (person.published ? "是" : "否") + " ｜ 图片：" + person.images.length}
+                    {"可展示：" + (person.published ? "是" : "否") + " ｜ 图片：" + person.images.length}
                   </p>
                 </div>
               </div>
@@ -1080,7 +1079,7 @@ function QRSection() {
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">#</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">姓名</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">短码</th>
-                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">已发布</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">可展示</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
