@@ -134,8 +134,8 @@ app/
     ImageLightbox.tsx         # 全屏灯箱（客户端）
     ImageGallery.tsx          # 图片网格 + 灯箱触发（客户端）
   loc/[code]/
-    page.tsx                 # 位置页（SSR，需登录）
-    FavoriteButton.tsx        # 收藏按钮（客户端，服务端数据）
+    page.tsx                 # 位置页（SSR，免登录可看）
+    FavoriteButton.tsx        # 收藏按钮（客户端，未登录先回跳登录）
   admin/page.tsx             # 运营后台（口令登录）
   api/
     auth/login/route.ts      # POST 学生登录 → session cookie
@@ -148,6 +148,7 @@ app/
     admin/login/route.ts     # POST 口令登录
     admin/import/route.ts    # POST 批量导入（生成账号密码）
     admin/location/route.ts  # POST 编辑位置页
+    admin/location/batch/route.ts  # POST 批量编辑位置页
     admin/takedown/route.ts  # POST 下架开关
     admin/export/route.ts    # GET 导出 CSV（含用户名、短码、主页、展位链接）
     admin/session/route.ts   # GET 校验当前 admin 会话
@@ -177,12 +178,13 @@ app/generated/prisma/        # Prisma 生成客户端（已提交 git）
 - **账号体系**：学生凭用户名+密码登录，session cookie（httpOnly JWT，14 天）。编辑和收藏基于登录身份
 - **两套 cookie 独立**：`owk_session`（学生）和 `owk_admin`（运营）互不干扰
 - **收藏单向静默**：A 收藏 B，只有 A 能看到；B 不通知、不显示次数、不显示是谁
-- **图片直传 R2**：前端压缩后通过 presigned URL 直传，不经过服务端
+- **图片直传 R2**：前端压缩后通过 presigned URL 直传，不经过服务端；头像上传不计入 4 张展示图限制
 - **短码复用**：同一 `code` 同时服务于 `/u/{code}`（主页）和 `/loc/{code}`（位置页）
-- **位置页是兜底**：即使某人没布置主页，位置页依然在，保证平等曝光
+- **位置页是兜底**：即使某人没布置主页，位置页依然免登录可看，保证平等曝光；收藏时才要求登录
+- **主页自动展示**：学生保存头像 + 任一姓名后，服务端自动视为可展示；管理员只负责下架异常内容
 - **bio 按 code point 计数**：上限 80，不是 byte 也不是 char
 - **密码不可逆**：存库的是 scrypt hash，明文只在生成/重置那一刻出现一次
-- **可见性由管理员控制**：默认所有人公开可见，管理员可选择开启学生自行控制主页可见性的开关
+- **登录保护**：生产环境必须配置足够长度的 `SESSION_SECRET` / `ADMIN_PASSWORD`，登录接口有基础限流
 
 ## 验证 Check
 

@@ -9,7 +9,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { code } = await request.json();
+  let code: string;
+  try {
+    const body = await request.json();
+    code = body.code;
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
+
   if (!code) {
     return NextResponse.json({ error: "code required" }, { status: 400 });
   }

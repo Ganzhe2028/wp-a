@@ -37,7 +37,7 @@ export default function AvatarUploader({
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contentType: `image/${ext}` }),
+          body: JSON.stringify({ contentType: `image/${ext}`, purpose: "avatar" }),
         }
       );
 

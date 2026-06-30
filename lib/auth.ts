@@ -3,9 +3,8 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
-const ADMIN_SECRET = new TextEncoder().encode(
-  process.env.ADMIN_PASSWORD || "change-me-in-production"
-);
+const ADMIN_PASSWORD = getSecret("ADMIN_PASSWORD", 8);
+const ADMIN_SECRET = new TextEncoder().encode(ADMIN_PASSWORD);
 
 const COOKIE_NAME = "owk_admin";
 const COOKIE_MAX_AGE = 60 * 60 * 8;
@@ -13,7 +12,7 @@ const COOKIE_MAX_AGE = 60 * 60 * 8;
 export async function createAdminSession(
   password: string
 ): Promise<string | null> {
-  if (password !== process.env.ADMIN_PASSWORD) return null;
+  if (password !== ADMIN_PASSWORD) return null;
 
   return new SignJWT({ role: "admin" })
     .setProtectedHeader({ alg: "HS256" })
@@ -86,9 +85,7 @@ export function verifyPassword(plain: string, stored: string): boolean {
 
 // ── Student Session (JWT, httpOnly cookie, 14d) ──
 
-const SESSION_SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET || "change-me-in-production"
-);
+const SESSION_SECRET = new TextEncoder().encode(getSecret("SESSION_SECRET", 32));
 const SESSION_COOKIE = "owk_session";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 14; // 14 days
 
@@ -132,4 +129,21 @@ export function clearStudentCookie() {
     path: "/",
     maxAge: 0,
   };
+}
+
+function getSecret(name: string, minLength: number): string {
+  const value = process.env[name];
+  const isProductionRuntime =
+    process.env.NODE_ENV === "production" &&
+    process.env.NEXT_PHASE !== "phase-production-build";
+
+  if (value && (!isProductionRuntime || value.length >= minLength)) {
+    return value;
+  }
+
+  if (isProductionRuntime) {
+    throw new Error(`${name} must be set and at least ${minLength} characters`);
+  }
+
+  return `development-${name}-change-me`;
 }

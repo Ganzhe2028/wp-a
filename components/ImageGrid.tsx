@@ -24,7 +24,7 @@ export default function ImageGrid({
 }: ImageGridProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const activeImages = images.filter((img) => true);
+  const activeImages = images;
   const remaining = Math.max(0, 4 - activeImages.length);
 
   async function handleFilesSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -59,7 +59,7 @@ export default function ImageGrid({
           throw new Error(err.error || "Failed to get upload URL");
         }
 
-        const { putUrl, publicUrl } = await presignRes.json();
+        const { putUrl, publicUrl, key } = await presignRes.json();
 
         await fetch(putUrl, {
           method: "PUT",
@@ -72,7 +72,7 @@ export default function ImageGrid({
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: publicUrl, key: publicUrl.split("/").pop() || "" }),
+            body: JSON.stringify({ url: publicUrl, key }),
           }
         );
 

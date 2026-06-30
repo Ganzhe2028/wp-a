@@ -1,21 +1,28 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
 interface FavoriteButtonProps {
   code: string;
-  name: string;
   initialFavorited: boolean;
+  loginHref?: string;
 }
 
 export default function FavoriteButton({
   code,
-  name,
   initialFavorited,
+  loginHref,
 }: FavoriteButtonProps) {
+  const router = useRouter();
   const [isFavorited, setIsFavorited] = useState(initialFavorited);
 
   const toggle = useCallback(async () => {
+    if (loginHref) {
+      router.push(loginHref);
+      return;
+    }
+
     const previousState = isFavorited;
     setIsFavorited(!previousState);
 
@@ -32,7 +39,7 @@ export default function FavoriteButton({
     } catch {
       setIsFavorited(previousState);
     }
-  }, [code, isFavorited]);
+  }, [code, isFavorited, loginHref, router]);
 
   return (
     <button

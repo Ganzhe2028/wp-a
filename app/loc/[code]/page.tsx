@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { prisma } from "@/lib/prisma";
 import { verifyStudentSession } from "@/lib/auth";
 import FavoriteButton from "./FavoriteButton";
@@ -22,9 +21,6 @@ export default async function LocationCardPage({ params }: Props) {
   const { code } = await params;
 
   const session = await verifyStudentSession();
-  if (!session) {
-    redirect('/?next=' + encodeURIComponent('/loc/' + code));
-  }
 
   const location = await prisma.locationCard.findUnique({
     where: { code },
@@ -98,16 +94,16 @@ export default async function LocationCardPage({ params }: Props) {
             </span>
             号位找到 TA，到展位碰展板看主页
             <span className="block mt-1 text-xs text-zinc-400">
-              📍 位置由 TA 设置 · 到展位可扫码或碰 NFC
+              位置由运营设置 · 到展位可扫码或碰 NFC
             </span>
           </div>
 
-          {session.personId !== location.person?.id && (
+          {(!session || session.personId !== location.person?.id) && (
             <div className="flex justify-center">
               <FavoriteButton
                 code={location.code}
-                name={location.name}
                 initialFavorited={initialFavorited}
+                loginHref={`/?next=${encodeURIComponent(`/loc/${code}`)}`}
               />
             </div>
           )}

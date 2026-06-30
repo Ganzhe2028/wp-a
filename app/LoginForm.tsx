@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 export default function LoginForm({ next }: { next: string | null }) {
   const router = useRouter();
@@ -9,6 +9,7 @@ export default function LoginForm({ next }: { next: string | null }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const isWeChat = useIsWeChatBrowser();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,6 +46,13 @@ export default function LoginForm({ next }: { next: string | null }) {
       onSubmit={handleSubmit}
       className="rounded-2xl bg-white p-6 shadow-sm"
     >
+      {isWeChat && (
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-800">
+          请在 Safari 或系统默认浏览器中打开后登录。微信内置浏览器和 NFC
+          打开的浏览器不共用登录状态。
+        </div>
+      )}
+
       <div className="mb-4">
         <label
           htmlFor="username"
@@ -91,6 +99,14 @@ export default function LoginForm({ next }: { next: string | null }) {
         {loading ? "登录中…" : "登录"}
       </button>
     </form>
+  );
+}
+
+function useIsWeChatBrowser(): boolean {
+  return useSyncExternalStore(
+    () => () => {},
+    () => /MicroMessenger/i.test(window.navigator.userAgent),
+    () => false
   );
 }
 

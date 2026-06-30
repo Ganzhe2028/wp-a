@@ -1,5 +1,6 @@
 "use client";
 
+import { parseCsvRows, serializeCsv } from "@/lib/csv";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /* ------------------------------------------------------------------ */
@@ -41,7 +42,7 @@ interface ExportRow {
   location: string;
 }
 
-type TabId = "import" | "location" | "takedown" | "export" | "qr" | "settings" | "reset";
+type TabId = "import" | "location" | "takedown" | "export" | "qr" | "reset";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "import", label: "导入名单" },
@@ -49,7 +50,6 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "takedown", label: "下架控制" },
   { id: "export", label: "导出" },
   { id: "qr", label: "QR 码" },
-  { id: "settings", label: "系统设置" },
   { id: "reset", label: "重置密码" },
 ];
 
@@ -58,25 +58,18 @@ const TABS: { id: TabId; label: string }[] = [
 /* ------------------------------------------------------------------ */
 
 function parseCsv(text: string) {
-  return text
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const sep = line.includes("\t") ? "\t" : ",";
-      const parts = line.split(sep).map((s) => s.trim());
-      const looksEnglish = /^[a-zA-Z]/.test(parts[0] ?? "");
-      if (looksEnglish) {
-        return { englishName: parts[0] ?? "", chineseName: parts[1] ?? "", grade: parts[2] ?? "" };
-      }
-      return { englishName: parts[1] ?? "", chineseName: parts[0] ?? "", grade: parts[2] ?? "" };
-    });
+  return parseCsvRows(text).map((parts) => {
+    const looksEnglish = /^[a-zA-Z]/.test(parts[0] ?? "");
+    if (looksEnglish) {
+      return { englishName: parts[0] ?? "", chineseName: parts[1] ?? "", grade: parts[2] ?? "" };
+    }
+    return { englishName: parts[1] ?? "", chineseName: parts[0] ?? "", grade: parts[2] ?? "" };
+  });
 }
 
 function parseExportCsv(text: string) {
-  const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-  return lines.slice(1).map((line) => {
-    const parts = line.split(",");
+  const rows = parseCsvRows(text);
+  return rows.slice(1).map((parts) => {
     return {
       chineseName: parts[0] ?? "",
       englishName: parts[1] ?? "",
@@ -264,7 +257,6 @@ function Dashboard({ tab, onTabChange, onLogout }: { tab: TabId; onTabChange: (t
         {tab === "takedown" && <TakedownSection />}
         {tab === "export" && <ExportSection onTabChange={onTabChange} />}
         {tab === "qr" && <QRSection />}
-        {tab === "settings" && <SettingsSection />}
         {tab === "reset" && <ResetPasswordSection />}
       </main>
     </div>
@@ -416,9 +408,10 @@ function ImportSection() {
             <button
               type="button"
               onClick={() => {
-                const header = "name,code,username,password";
-                const rows = result.map((p) => `${p.chineseName},${p.code},${p.username},${p.password}`);
-                const csv = [header, ...rows].join("\n");
+                const csv = serializeCsv([
+                  ["name", "code", "username", "password"],
+                  ...result.map((p) => [p.chineseName, p.code, p.username, p.password]),
+                ]);
                 const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement("a");
@@ -446,6 +439,8 @@ function ImportSection() {
 
 function LocationSection() {
   const [form, setForm] = useState({ code: "", name: "", grade: "", room: "", seat: "" });
+  const [bulkText, setBulkText] = useState("");
+  const [bulkSaving, setBulkSaving] = useState(false);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null);
 
@@ -474,12 +469,73 @@ function LocationSection() {
     }
   }
 
+  async function handleBulkSubmit() {
+    const rows = parseCsvRows(bulkText).map((parts) => ({
+      code: parts[0] ?? "",
+      name: parts[1] ?? "",
+      grade: parts[2] ?? "",
+      room: parts[3] ?? "",
+      seat: parts[4] ?? "",
+    }));
+
+    if (rows.length === 0) {
+      setFeedback({ ok: false, msg: "没有解析到位置数据" });
+      return;
+    }
+
+    setBulkSaving(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/admin/location/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rows }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setFeedback({ ok: false, msg: data.error ?? "批量导入失败" });
+      } else {
+        setFeedback({ ok: true, msg: `已批量保存 ${data.count} 条位置` });
+        setBulkText("");
+      }
+    } catch {
+      setFeedback({ ok: false, msg: "网络错误" });
+    } finally {
+      setBulkSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">编辑位置页</h2>
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
         使用学生短码编辑其位置信息（展位房间和座位号）。
       </p>
+
+      <div className="space-y-2 rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <label htmlFor="loc-bulk" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+          批量导入位置
+        </label>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          每行格式：code,name,grade,room,seat
+        </p>
+        <textarea
+          id="loc-bulk"
+          value={bulkText}
+          onChange={(e) => setBulkText(e.target.value)}
+          placeholder={"abc123,张三,9,A101,12\nxyz789,李四,10,A102,03"}
+          rows={5}
+          className="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 sm:text-sm dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+        />
+        <button
+          type="button"
+          onClick={handleBulkSubmit}
+          disabled={!bulkText.trim() || bulkSaving}
+          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 disabled:opacity-40 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        >
+          {bulkSaving ? "批量保存中…" : "批量保存位置"}
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-3 w-full max-w-md">
         <div>
@@ -561,6 +617,7 @@ function TakedownSection() {
   const [query, setQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [batchSaving, setBatchSaving] = useState(false);
+  const [actionError, setActionError] = useState("");
   const selectAllRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -618,28 +675,31 @@ function TakedownSection() {
   }
 
   async function togglePerson(person: Person) {
+    setActionError("");
     try {
-      await fetch("/api/admin/takedown", {
+      const res = await fetch("/api/admin/takedown", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "person", id: person.id, hidden: !person.hidden }),
       });
+      if (!res.ok) throw new Error("保存失败");
       setPersons((prev) =>
         prev.map((p) => (p.id === person.id ? { ...p, hidden: !p.hidden } : p))
       );
     } catch {
-      /* empty */
+      setActionError("下架状态保存失败，请刷新后重试");
     }
   }
 
   async function batchToggle(hidden: boolean) {
     setBatchSaving(true);
+    setActionError("");
     const targets = [...selectedIds]
       .filter((id) => filteredIds.has(id))
       .map((id) => persons.find((p) => p.id === id)!)
       .filter((p) => p && p.hidden !== hidden);
 
-    await Promise.allSettled(
+    const results = await Promise.allSettled(
       targets.map((p) =>
         fetch("/api/admin/takedown", {
           method: "POST",
@@ -649,22 +709,36 @@ function TakedownSection() {
       )
     );
 
-    setPersons((prev) =>
-      prev.map((p) =>
-        selectedIds.has(p.id) ? { ...p, hidden } : p
-      )
+    const successIds = new Set(
+      results.flatMap((result, index) => {
+        if (result.status !== "fulfilled" || !result.value.ok) return [];
+        return [targets[index].id];
+      })
     );
-    setSelectedIds(new Set());
+
+    if (successIds.size > 0) {
+      setPersons((prev) =>
+        prev.map((p) =>
+          successIds.has(p.id) ? { ...p, hidden } : p
+        )
+      );
+    }
+    if (successIds.size !== targets.length) {
+      setActionError(`已保存 ${successIds.size}/${targets.length} 人，失败项未改动`);
+    }
+    setSelectedIds(new Set([...selectedIds].filter((id) => !successIds.has(id))));
     setBatchSaving(false);
   }
 
   async function toggleImage(imageId: string, personId: string, currentHidden: boolean) {
+    setActionError("");
     try {
-      await fetch("/api/admin/takedown", {
+      const res = await fetch("/api/admin/takedown", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "image", id: imageId, hidden: !currentHidden }),
       });
+      if (!res.ok) throw new Error("保存失败");
       setPersons((prev) =>
         prev.map((p) =>
           p.id === personId
@@ -678,7 +752,7 @@ function TakedownSection() {
         )
       );
     } catch {
-      /* empty */
+      setActionError("图片显示状态保存失败，请刷新后重试");
     }
   }
 
@@ -696,6 +770,10 @@ function TakedownSection() {
         placeholder="搜索姓名、英文名或短码…"
         className="block w-full max-w-md rounded-lg border border-zinc-300 bg-white px-3 py-2 text-base sm:text-sm text-zinc-900 outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-400 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
       />
+
+      {actionError && (
+        <p className="text-sm text-red-600 dark:text-red-400">{actionError}</p>
+      )}
 
       {filtered.length === 0 && (
         <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -873,7 +951,7 @@ function ExportSection({ onTabChange }: { onTabChange: (t: TabId) => void }) {
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">中文名</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">英文名</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">用户名</th>
-                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">密码</th>
+                <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">密码重置</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">主页</th>
                 <th className="px-2 py-2 font-medium text-zinc-600 sm:px-3 dark:text-zinc-400">位置页</th>
               </tr>
@@ -1028,21 +1106,6 @@ function QRSection() {
           </table>
         </div>
       )}
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  System Settings                                                    */
-/* ------------------------------------------------------------------ */
-
-function SettingsSection() {
-  return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-100">系统设置</h2>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">
-        暂无可用设置项。
-      </p>
     </div>
   );
 }

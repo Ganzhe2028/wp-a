@@ -19,7 +19,6 @@ interface PagePerson {
   grade: string | null;
   bio: string | null;
   avatarUrl: string | null;
-  published: boolean;
   images: PageImage[];
 }
 
@@ -51,7 +50,6 @@ export default async function MePage() {
     grade: person.grade,
     bio: person.bio,
     avatarUrl: person.avatarUrl,
-    published: person.published,
     images: person.images.map((img) => ({
       id: img.id,
       url: img.url,

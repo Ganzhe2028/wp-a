@@ -21,7 +21,17 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { key, value } = await request.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
+
+  const { key, value } = body;
   if (!key || value === undefined) {
     return NextResponse.json(
       { error: "key and value required" },
@@ -30,10 +40,10 @@ export async function PATCH(request: NextRequest) {
   }
 
   await prisma.systemSetting.upsert({
-    where: { key },
+    where: { key: String(key) },
     update: { value: String(value) },
-    create: { key, value: String(value) },
+    create: { key: String(key), value: String(value) },
   });
 
-  return NextResponse.json({ ok: true, key, value: String(value) });
+  return NextResponse.json({ ok: true, key: String(key), value: String(value) });
 }

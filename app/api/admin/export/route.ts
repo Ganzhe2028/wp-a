@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { verifyAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { serializeCsv } from "@/lib/csv";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   if (!(await verifyAdminSession())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -12,7 +13,6 @@ export async function GET(request: NextRequest) {
     orderBy: { createdAt: "asc" },
   });
 
-  const header = "chineseName,englishName,username,code,homepage,location";
   const rows = persons.map((p: typeof persons[number]) =>
     [
       p.chineseName || "",
@@ -21,10 +21,13 @@ export async function GET(request: NextRequest) {
       p.code,
       `${baseUrl}/u/${p.code}`,
       `${baseUrl}/loc/${p.code}`,
-    ].join(",")
+    ]
   );
 
-  const csv = [header, ...rows].join("\n");
+  const csv = serializeCsv([
+    ["chineseName", "englishName", "username", "code", "homepage", "location"],
+    ...rows,
+  ]);
 
   return new NextResponse(csv, {
     headers: {

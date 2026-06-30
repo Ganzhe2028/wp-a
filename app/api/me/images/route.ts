@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyStudentSession } from "@/lib/auth";
-import { deleteFromR2 } from "@/lib/r2";
+import { deleteFromR2, getPublicUrl } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
@@ -9,10 +9,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { url, key } = await request.json();
-  if (!url || !key) {
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
+
+  const { url, key } = body;
+  if (typeof url !== "string" || typeof key !== "string") {
     return NextResponse.json(
       { error: "url and key required" },
+      { status: 400 }
+    );
+  }
+
+  const expectedPrefix = `${session.personId}/image/`;
+  if (!key.startsWith(expectedPrefix) || url !== getPublicUrl(key)) {
+    return NextResponse.json(
+      { error: "Invalid image key" },
       { status: 400 }
     );
   }

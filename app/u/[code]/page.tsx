@@ -55,7 +55,11 @@ export default async function ProfilePage({ params }: PageProps) {
     )
   }
 
-  if (!person.published) {
+  const profileIsReady = Boolean(
+    person.avatarUrl && (person.englishName || person.chineseName),
+  );
+
+  if (!profileIsReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-6">
         <div className="text-center max-w-xs">
@@ -87,7 +91,7 @@ export default async function ProfilePage({ params }: PageProps) {
   }
 
   const showFavoriteButton =
-    session && person && !person.hidden && person.published &&
+    session && person && !person.hidden && profileIsReady &&
     session.personId !== person.id;
 
   return (
@@ -145,7 +149,6 @@ export default async function ProfilePage({ params }: PageProps) {
           <div className="flex justify-center mb-8">
             <FavoriteButton
               code={person.code}
-              name={person.chineseName || person.englishName || code}
               initialFavorited={initialFavorited}
             />
           </div>

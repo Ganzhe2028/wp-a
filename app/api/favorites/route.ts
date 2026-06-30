@@ -8,7 +8,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { code } = await request.json();
+  let code: string;
+  try {
+    const body = await request.json();
+    code = body.code;
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
+
   if (!code || typeof code !== "string") {
     return NextResponse.json({ error: "Invalid code" }, { status: 400 });
   }

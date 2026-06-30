@@ -11,9 +11,11 @@ export async function POST(request: NextRequest) {
   }
 
   let contentType: string;
+  let purpose: string;
   try {
     const body = await request.json();
     contentType = body.contentType;
+    purpose = body.purpose;
   } catch {
     return NextResponse.json(
       { error: "Invalid request body" },
@@ -28,6 +30,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const uploadPurpose = purpose === "avatar" ? "avatar" : "image";
+
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
   if (!allowedTypes.includes(contentType)) {
     return NextResponse.json(
@@ -36,19 +40,21 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const imageCount = await prisma.image.count({
-    where: { personId: session.personId, hidden: false },
-  });
+  if (uploadPurpose === "image") {
+    const imageCount = await prisma.image.count({
+      where: { personId: session.personId, hidden: false },
+    });
 
-  if (imageCount >= 4) {
-    return NextResponse.json(
-      { error: "Maximum 4 images allowed" },
-      { status: 409 }
-    );
+    if (imageCount >= 4) {
+      return NextResponse.json(
+        { error: "Maximum 4 images allowed" },
+        { status: 409 }
+      );
+    }
   }
 
   const ext = contentType.split("/")[1] || "webp";
-  const key = `${session.personId}/${nanoid()}.${ext}`;
+  const key = `${session.personId}/${uploadPurpose}/${nanoid()}.${ext}`;
 
   const putUrl = await createPresignedUploadUrl(key, contentType);
   const publicUrl = getPublicUrl(key);

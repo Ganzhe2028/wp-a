@@ -5,6 +5,7 @@ import {
   createStudentSession,
   setStudentCookie,
 } from "@/lib/auth";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   let username: string;
@@ -24,6 +25,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: "username and password required" },
       { status: 400 }
+    );
+  }
+
+  const ip = getClientIp(request.headers);
+  const ipLimit = checkRateLimit(`student-login:ip:${ip}`, 20, 60_000);
+  const accountLimit = checkRateLimit(
+    `student-login:account:${username}`,
+    8,
+    60_000
+  );
+  if (!ipLimit.allowed || !accountLimit.allowed) {
+    const retryAfter = Math.max(ipLimit.retryAfter, accountLimit.retryAfter);
+    return NextResponse.json(
+      { error: "Too many login attempts" },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
     );
   }
 

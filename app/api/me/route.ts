@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyStudentSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await verifyStudentSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,10 +22,23 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { englishName, chineseName, grade, bio, avatarUrl, published } = body;
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
 
-  if (bio !== undefined) {
+  const { englishName, chineseName, grade, bio, avatarUrl } = body;
+
+  if (bio !== undefined && bio !== null && typeof bio !== "string") {
+    return NextResponse.json({ error: "Bio must be text" }, { status: 400 });
+  }
+
+  if (bio !== undefined && bio !== null) {
     const codePoints = [...bio].length;
     if (codePoints > 80) {
       return NextResponse.json(
@@ -35,31 +48,44 @@ export async function PATCH(request: NextRequest) {
     }
   }
 
-  if (published === true) {
-    const person = await prisma.person.findUnique({
-      where: { id: session.personId },
-      select: { avatarUrl: true },
-    });
-    const hasAvatar = body.avatarUrl || person?.avatarUrl;
-    if (!hasAvatar) {
-      return NextResponse.json(
-        { error: "Avatar is required before publishing" },
-        { status: 400 }
-      );
-    }
+  const current = await prisma.person.findUnique({
+    where: { id: session.personId },
+    select: {
+      englishName: true,
+      chineseName: true,
+      avatarUrl: true,
+    },
+  });
+
+  if (!current) {
+    return NextResponse.json({ error: "Person not found" }, { status: 404 });
   }
+
+  const nextEnglishName =
+    englishName !== undefined ? normalizeOptionalString(englishName) : current.englishName;
+  const nextChineseName =
+    chineseName !== undefined ? normalizeOptionalString(chineseName) : current.chineseName;
+  const nextAvatarUrl =
+    avatarUrl !== undefined ? normalizeOptionalString(avatarUrl) : current.avatarUrl;
+  const isDisplayReady = Boolean(nextAvatarUrl && (nextEnglishName || nextChineseName));
 
   const updated = await prisma.person.update({
     where: { id: session.personId },
     data: {
-      ...(englishName !== undefined && { englishName }),
-      ...(chineseName !== undefined && { chineseName }),
-      ...(grade !== undefined && { grade }),
-      ...(bio !== undefined && { bio }),
-      ...(avatarUrl !== undefined && { avatarUrl }),
-      ...(published !== undefined && { published }),
+      ...(englishName !== undefined && { englishName: nextEnglishName }),
+      ...(chineseName !== undefined && { chineseName: nextChineseName }),
+      ...(grade !== undefined && { grade: normalizeOptionalString(grade) }),
+      ...(bio !== undefined && { bio: normalizeOptionalString(bio) }),
+      ...(avatarUrl !== undefined && { avatarUrl: nextAvatarUrl }),
+      published: isDisplayReady,
     },
   });
 
   return NextResponse.json({ ok: true, person: updated });
+}
+
+function normalizeOptionalString(value: unknown): string | null {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value !== "string") return String(value);
+  return value;
 }

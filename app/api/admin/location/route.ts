@@ -7,7 +7,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { code, name, grade, room, seat } = await request.json();
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
+
+  const { code, name, grade, room, seat } = body;
   if (!code || !name || room === undefined || seat === undefined) {
     return NextResponse.json(
       { error: "code, name, room, seat required" },
@@ -16,16 +26,16 @@ export async function POST(request: NextRequest) {
   }
 
   const location = await prisma.locationCard.upsert({
-    where: { code },
-    update: { name, grade: grade || null, room, seat },
+    where: { code: String(code) },
+    update: { name: String(name), grade: grade ? String(grade) : null, room: String(room), seat: String(seat) },
     create: {
-      code,
-      name,
-      grade: grade || null,
-      room,
-      seat,
+      code: String(code),
+      name: String(name),
+      grade: grade ? String(grade) : null,
+      room: String(room),
+      seat: String(seat),
       person: {
-        connect: { code },
+        connect: { code: String(code) },
       },
     },
   });
