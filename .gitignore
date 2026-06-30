@@ -44,3 +44,7 @@ next-env.d.ts
 .opencode
 .omo
 .sisyphus
+
+# agent harness review output
+.agent/review/*
+!.agent/review/.gitkeep

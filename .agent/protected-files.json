@@ -1,0 +1,26 @@
+{
+  "protected": [
+    "PRODUCT_INVARIANTS.md",
+    "AGENTS.md",
+    "TASK.md",
+    "AGENT_LOOP.md",
+    "REVIEWER.md",
+    "scripts/agent-check.mjs",
+    "scripts/verify-agent-contract.mjs",
+    "scripts/check-protected-files.mjs",
+    "scripts/prepare-review-bundle.mjs",
+    "scripts/check-dead-references.mjs",
+    "scripts/check-env-sync.mjs",
+    "scripts/check-doc-sync.mjs",
+    "package.json",
+    ".github/workflows/**",
+    ".githooks/**",
+    ".opencode/**"
+  ],
+  "protectedPackageScripts": [
+    "agent:check",
+    "agent:verify",
+    "agent:review-bundle",
+    "agent:protected"
+  ]
+}

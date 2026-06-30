@@ -73,6 +73,18 @@ npx prisma migrate dev    # 建表
 npm run dev               # 启动开发服务器 → http://localhost:3000
 ```
 
+### Agent harness
+
+本仓库带最小 agent harness，用来防止修改时绕过产品约束、检查脚本或文档同步。
+
+```bash
+npm run agent:check          # lint + build + harness checks
+npm run agent:review-bundle  # protected files 变更时生成独立审查材料
+npm run agent:install-hooks  # 启用 repo-local git hooks
+```
+
+Protected files 见 `.agent/protected-files.json`。这些文件不是不能改，但改动后需要独立 review 和人工批准。
+
 ### 部署
 
 1. GitHub 建仓，推代码
@@ -213,6 +225,8 @@ v2.0 在 v1.0 基础上新增：
 - [开发文档 v1.0 – 接口契约与构建顺序](docs/02_开发文档_OWeek个人主页系统_v1.0.md)
 - [开发文档 v2.0 – 账号系统迁移](docs/04_开发文档_v2.0_账号系统迁移.md)
 - [操作手册 – 新人接手指南](docs/03_操作手册.md)
+- [Codex handoff](docs/HANDOFF_CODEX.md)
+- [OpenCode handoff](docs/HANDOFF_OPENCODE.md)
 - [AGENTS.md](AGENTS.md) – coding agent 工作规范
 
 ## 线上

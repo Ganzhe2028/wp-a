@@ -3,11 +3,34 @@
 ## Source of Truth
 
 Read these before writing code:
+- `PRODUCT_INVARIANTS.md` — protected product and engineering invariants
+- `TASK.md` — current task, non-goals, acceptance criteria, expected files
+- `AGENT_LOOP.md` — required coding-agent loop
 - `docs/01_PRD_OWeek个人主页系统_v1.0.md` — product spec, user flows, states
 - `docs/02_开发文档_OWeek个人主页系统_v1.0.md` — v1.0 tech stack, data model (historical reference)
 - `docs/04_开发文档_v2.0_账号系统迁移.md` — v2.0 account system spec (current executable target)
 
 The v2.0 dev doc (04) is the current spec. It covers v1.0 constraints that remain valid. Follow it literally — it was written for agents.
+
+## Agent Harness
+
+Every coding handoff must run:
+
+```bash
+npm run agent:check
+```
+
+Protected files are listed in `.agent/protected-files.json`. Changing them is allowed only through the review path:
+
+```bash
+npm run agent:review-bundle
+```
+
+The approval bypass is explicit and must be named in the handoff:
+
+```bash
+AGENT_ALLOW_PROTECTED_CHANGE=1 npm run agent:check
+```
 
 ## Working Philosophy
 
@@ -176,7 +199,7 @@ The same `Person.code` serves both `/u/{code}` (profile) and `/loc/{code}` (loca
 ### States ≠ pages
 - `hidden=true` → show "该页面已隐藏" placeholder, not blank screen.
 - `published=false` → show "这位同学还没布置主页" placeholder (only when visibility control enabled).
-- Both `/u/[code]` and `/loc/[code]` require login (session gate). Unauthenticated users redirect to `/?next=<path>`.
+- `/u/[code]` requires login. `/loc/[code]` is viewable without login; login is required only when the user tries to favorite someone.
 
 ### Build order
 For v2.0, follow the 10-step sequence in section 11 of docs/04_开发文档_v2.0_账号系统迁移.md.

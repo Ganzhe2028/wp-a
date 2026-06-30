@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+echo "[agent-harness] Running pre-commit checks..."
+
+npm run agent:check
+
+echo "[agent-harness] Passed."

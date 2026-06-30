@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "agent:check": "node scripts/agent-check.mjs",
+    "agent:verify": "node scripts/verify-agent-contract.mjs",
+    "agent:protected": "node scripts/check-protected-files.mjs",
+    "agent:review-bundle": "node scripts/prepare-review-bundle.mjs",
+    "agent:install-hooks": "node scripts/install-githooks.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1075.0",
