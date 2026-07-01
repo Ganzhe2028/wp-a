@@ -3,7 +3,7 @@
     "id": "OWK-001",
     "title": "R2 image key must persist returned key",
     "severity": "P1",
-    "status": "open",
+    "status": "fixed",
     "source": "k2.7c-review",
     "evidence": [
       "components/ImageGrid.tsx",
@@ -11,55 +11,55 @@
       "app/api/me/images/route.ts"
     ],
     "expectedFix": "Frontend saves the exact key returned by /api/upload-url, not a key derived from publicUrl.",
-    "verification": ""
+    "verification": "components/ImageGrid.tsx saves the exact key returned by /api/upload-url; app/api/me/images/route.ts validates key ownership and URL equality before creating the Image row."
   },
   {
     "id": "OWK-002",
     "title": "JWT secrets must not fall back to change-me-in-production",
     "severity": "P1",
-    "status": "open",
+    "status": "fixed",
     "source": "k2.7c-review",
     "evidence": [
       "lib/auth.ts"
     ],
     "expectedFix": "Session signing secrets fail closed when required env vars are missing instead of using hard-coded fallback values.",
-    "verification": ""
+    "verification": "lib/auth.ts uses getRequiredEnv() for ADMIN_PASSWORD and SESSION_SECRET; missing values throw instead of falling back."
   },
   {
     "id": "OWK-003",
     "title": "Docs must not recommend PRISMA_QUERY_ENGINE_LIBRARY on Vercel",
     "severity": "P1",
-    "status": "open",
+    "status": "fixed",
     "source": "deployment-postmortem",
     "evidence": [
       "README.md"
     ],
     "expectedFix": "README/docs state that PRISMA_QUERY_ENGINE_LIBRARY should not be set for this deployment path.",
-    "verification": ""
+    "verification": "README.md and docs no longer recommend setting PRISMA_QUERY_ENGINE_LIBRARY for Vercel; npm run audit:harness checks this."
   },
   {
     "id": "OWK-004",
     "title": "Admin batch import is not transactional",
     "severity": "P2",
-    "status": "deferred",
+    "status": "fixed",
     "source": "k2.7c-review",
     "evidence": [
       "app/api/admin/import/route.ts"
     ],
     "expectedFix": "Batch import creates all rows atomically or clearly reports partial success with a recovery path.",
-    "verification": "Deferred for first harness version: operationally low frequency, and existing admin import can be manually inspected before event use."
+    "verification": "app/api/admin/import/route.ts pre-generates account data and persists all Person + LocationCard rows inside prisma.$transaction; P2002 returns 409 and rolls back the batch."
   },
   {
     "id": "OWK-005",
     "title": "Image count limit has a race window",
     "severity": "P2",
-    "status": "deferred",
+    "status": "fixed",
     "source": "k2.7c-review",
     "evidence": [
       "app/api/upload-url/route.ts",
       "app/api/me/images/route.ts"
     ],
     "expectedFix": "Image count cap is enforced atomically or through a compensating cleanup path.",
-    "verification": "Deferred for first harness version: low-frequency student uploads make the race unlikely, and the existing double check remains a useful guard."
+    "verification": "app/api/me/images/route.ts performs the final image count, max sort lookup, and create inside a Serializable transaction with P2034 retry."
   }
 ]

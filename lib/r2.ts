@@ -53,6 +53,12 @@ export function getPublicUrl(key: string): string {
   return `${base}/${key}`;
 }
 
+export function getKeyFromPublicUrl(url: string): string | null {
+  const base = process.env.R2_PUBLIC_BASE_URL?.replace(/\/$/, "");
+  if (!base || !url.startsWith(`${base}/`)) return null;
+  return url.slice(base.length + 1).split("?")[0] || null;
+}
+
 export async function deleteFromR2(key: string): Promise<void> {
   const command = new DeleteObjectCommand({
     Bucket: process.env.R2_BUCKET!,

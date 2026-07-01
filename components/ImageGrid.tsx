@@ -54,7 +54,7 @@ export default function ImageGrid({
           throw new Error(err.error || "Failed to get upload URL");
         }
 
-        const { putUrl, publicUrl } = await presignRes.json();
+        const { putUrl, publicUrl, key } = await presignRes.json();
 
         await fetch(putUrl, {
           method: "PUT",
@@ -65,7 +65,7 @@ export default function ImageGrid({
         const saveRes = await fetch("/api/me/images", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: publicUrl, key: publicUrl.split("/").pop() || "" }),
+          body: JSON.stringify({ url: publicUrl, key }),
         });
 
         if (!saveRes.ok) throw new Error("Failed to save image record");

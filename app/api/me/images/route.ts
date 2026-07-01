@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyStudentSession } from "@/lib/auth";
-import { deleteFromR2 } from "@/lib/r2";
+import { deleteFromR2, getKeyFromPublicUrl, getPublicUrl } from "@/lib/r2";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/app/generated/prisma/client";
+
+const MAX_SAVE_ATTEMPTS = 3;
+
+class ImageLimitError extends Error {}
 
 export async function POST(request: NextRequest) {
   const session = await verifyStudentSession();
@@ -17,32 +22,74 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const imageCount = await prisma.image.count({
-    where: { personId: session.personId, hidden: false },
-  });
-
-  if (imageCount >= 4) {
+  if (typeof url !== "string" || typeof key !== "string") {
     return NextResponse.json(
-      { error: "Maximum 4 images allowed" },
-      { status: 409 }
+      { error: "url and key must be strings" },
+      { status: 400 }
     );
   }
 
-  const maxSort = await prisma.image.aggregate({
-    where: { personId: session.personId },
-    _max: { sort: true },
-  });
+  if (!key.startsWith(`${session.personId}/`) || url !== getPublicUrl(key)) {
+    return NextResponse.json(
+      { error: "Invalid image key or URL" },
+      { status: 400 }
+    );
+  }
 
-  const image = await prisma.image.create({
-    data: {
-      personId: session.personId,
-      url,
-      key,
-      sort: (maxSort._max.sort ?? -1) + 1,
-    },
-  });
+  for (let attempt = 1; attempt <= MAX_SAVE_ATTEMPTS; attempt++) {
+    try {
+      const image = await prisma.$transaction(
+        async (tx) => {
+          const imageCount = await tx.image.count({
+            where: { personId: session.personId, hidden: false },
+          });
 
-  return NextResponse.json({ image });
+          if (imageCount >= 4) {
+            throw new ImageLimitError();
+          }
+
+          const maxSort = await tx.image.aggregate({
+            where: { personId: session.personId },
+            _max: { sort: true },
+          });
+
+          return tx.image.create({
+            data: {
+              personId: session.personId,
+              url,
+              key,
+              sort: (maxSort._max.sort ?? -1) + 1,
+            },
+          });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+      );
+
+      return NextResponse.json({ image });
+    } catch (error) {
+      if (error instanceof ImageLimitError) {
+        return NextResponse.json(
+          { error: "Maximum 4 images allowed" },
+          { status: 409 }
+        );
+      }
+
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2034" &&
+        attempt < MAX_SAVE_ATTEMPTS
+      ) {
+        continue;
+      }
+
+      throw error;
+    }
+  }
+
+  return NextResponse.json(
+    { error: "Could not save image after retrying" },
+    { status: 503 }
+  );
 }
 
 export async function DELETE(request: NextRequest) {
@@ -64,7 +111,10 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Image not found" }, { status: 404 });
   }
 
-  await deleteFromR2(image.key);
+  const r2Key = image.key.includes("/")
+    ? image.key
+    : getKeyFromPublicUrl(image.url) ?? image.key;
+  await deleteFromR2(r2Key);
   await prisma.image.delete({ where: { id } });
 
   return NextResponse.json({ ok: true });

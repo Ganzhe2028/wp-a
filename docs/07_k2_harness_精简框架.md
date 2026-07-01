@@ -66,6 +66,7 @@ npm run verify:local
 - `/api/me` 不能返回未筛选的 `Person` 敏感字段。
 - `next` 回跳不能使用会放过外部 URL 的校验方式。
 - P0/P1 `open` finding 会阻断交付。
+- P2 finding 不阻断默认交付，但本项目当前台账应保持无 `open` P2；若重新延期必须写明原因。
 - 修改核心代码但未同步 docs 时输出 warning。
 
 脚本输出分为：

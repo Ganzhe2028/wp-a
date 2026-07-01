@@ -3,9 +3,21 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 
-const ADMIN_SECRET = new TextEncoder().encode(
-  process.env.ADMIN_PASSWORD || "change-me-in-production"
-);
+function getRequiredEnv(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
+function getAdminPassword(): string {
+  return getRequiredEnv("ADMIN_PASSWORD");
+}
+
+function getAdminSecret(): Uint8Array {
+  return new TextEncoder().encode(getAdminPassword());
+}
 
 const COOKIE_NAME = "owk_admin";
 const COOKIE_MAX_AGE = 60 * 60 * 8;
@@ -13,13 +25,13 @@ const COOKIE_MAX_AGE = 60 * 60 * 8;
 export async function createAdminSession(
   password: string
 ): Promise<string | null> {
-  if (password !== process.env.ADMIN_PASSWORD) return null;
+  if (password !== getAdminPassword()) return null;
 
   return new SignJWT({ role: "admin" })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("8h")
-    .sign(ADMIN_SECRET);
+    .sign(getAdminSecret());
 }
 
 export async function verifyAdminSession(): Promise<boolean> {
@@ -28,7 +40,7 @@ export async function verifyAdminSession(): Promise<boolean> {
   if (!token) return false;
 
   try {
-    await jwtVerify(token, ADMIN_SECRET);
+    await jwtVerify(token, getAdminSecret());
     return true;
   } catch {
     return false;
@@ -86,9 +98,10 @@ export function verifyPassword(plain: string, stored: string): boolean {
 
 // ── Student Session (JWT, httpOnly cookie, 14d) ──
 
-const SESSION_SECRET = new TextEncoder().encode(
-  process.env.SESSION_SECRET || "change-me-in-production"
-);
+function getSessionSecret(): Uint8Array {
+  return new TextEncoder().encode(getRequiredEnv("SESSION_SECRET"));
+}
+
 const SESSION_COOKIE = "owk_session";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 14; // 14 days
 
@@ -97,7 +110,7 @@ export async function createStudentSession(personId: string): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("14d")
-    .sign(SESSION_SECRET);
+    .sign(getSessionSecret());
 }
 
 export async function verifyStudentSession(): Promise<{ personId: string } | null> {
@@ -105,7 +118,7 @@ export async function verifyStudentSession(): Promise<{ personId: string } | nul
   const token = cookieStore.get(SESSION_COOKIE)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, SESSION_SECRET);
+    const { payload } = await jwtVerify(token, getSessionSecret());
     return { personId: payload.pid as string };
   } catch {
     return null;

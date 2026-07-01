@@ -152,6 +152,7 @@ Next.js App Router v16+, React, TypeScript, Prisma + Neon PostgreSQL, Cloudflare
 - Admin = shared password → signed `owk_admin` httpOnly cookie (8 hours). Separate from student session; both systems coexist.
 - `editToken` column still exists (NOT NULL @unique), still generated on import, but `/edit/{token}` route is retired. Editing is through `/me` with session cookie.
 - Session cookie MUST be server-side `Set-Cookie` (never `document.cookie` or localStorage) — this is critical for Safari ITP survival over 10+ days.
+- `ADMIN_PASSWORD` and `SESSION_SECRET` have no hard-coded fallback. Missing auth env vars must fail closed instead of silently signing JWTs with a default secret.
 - Password hash uses Node built-in `node:crypto` scrypt + `timingSafeEqual`. Format: `"salt_hex:hash_hex"`.
 - Favorites are server-side (Favorite table), one-way (no "who favorited me" reads), no localStorage caching.
 
@@ -161,6 +162,7 @@ Next.js App Router v16+, React, TypeScript, Prisma + Neon PostgreSQL, Cloudflare
 3. PUTs directly to R2 — **never through server**
 4. POSTs `/api/me/images` to save the record
 5. Avatar uses same flow but stored on `Person.avatarUrl`, not counted toward the 4-image limit
+- Persist the exact `key` returned by `/api/upload-url`; never derive it from `publicUrl`. `/api/me/images` validates key ownership and URL equality, then performs the final image-count check inside a Serializable transaction.
 
 ### Short codes: shared between pages
 The same `Person.code` serves both `/u/{code}` (profile) and `/loc/{code}` (location card). Each person gets one code. Default username = code.
@@ -213,6 +215,7 @@ Session cookie (`owk_session`) must be set via server `Set-Cookie` header, never
 ### Password: plaintext only at generation (2026-06-26)
 Account passwords are 12-char scrypt hashes using `PRINTABLE_PASSWORD_ALPHABET` (mixed case + digits + safe symbols, excluding visually ambiguous chars). The plaintext is returned ONCE during import (`/api/admin/import`) or reset (`/api/admin/reset-password`). Export (`/api/admin/export`) does NOT include passwords. No student self-service password recovery.
 - Login route has per-IP and per-username rate limiting to slow online brute-force attempts.
+- Admin batch import is transactional: Person and LocationCard rows are created as an all-or-nothing batch, and uniqueness conflicts return 409.
 
 ### Favorites: one-way, no reverse reads (2026-06-26)
 `Favorite.favoriteeId` and `Person.favoritesReceived` exist ONLY for cascade delete. Never query "who favorited me" — this is a product hard-decision, not a performance optimization.
