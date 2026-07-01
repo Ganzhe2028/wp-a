@@ -42,6 +42,11 @@ interface ExportRow {
   location: string;
 }
 
+interface ApiResponse<T> {
+  data: T | null;
+  error: string | null;
+}
+
 type TabId = "import" | "location" | "takedown" | "export" | "qr" | "settings" | "reset";
 
 const TABS: { id: TabId; label: string }[] = [
@@ -87,6 +92,20 @@ function parseExportCsv(text: string) {
       location: parts[5] ?? "",
     };
   });
+}
+
+async function readApiResponse<T>(res: Response): Promise<ApiResponse<T>> {
+  const text = await res.text();
+  if (!text) return { data: null, error: null };
+
+  try {
+    return { data: JSON.parse(text) as T, error: null };
+  } catch {
+    return {
+      data: null,
+      error: res.ok ? "服务器返回格式错误" : `请求失败（HTTP ${res.status}）`,
+    };
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -305,9 +324,11 @@ function ImportSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rows }),
       });
-      const data = await res.json();
+      const { data, error: parseError } = await readApiResponse<{ created: CreatedPerson[]; error?: string }>(res);
       if (!res.ok) {
-        setError(data.error ?? "导入失败");
+        setError(data?.error ?? parseError ?? "导入失败");
+      } else if (!data) {
+        setError(parseError ?? "导入失败：服务器没有返回结果");
       } else {
         setResult(data.created);
         setText("");

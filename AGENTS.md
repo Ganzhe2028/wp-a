@@ -202,7 +202,7 @@ Production: `https://msoweek.site` (Vercel, auto-deploys from `main` branch).
 
 ### Vercel deployment: Prisma engine binary (2026-06-25)
 1. **binaryTargets must include `rhel-openssl-3.0.x`**
-2. **Commit generated Prisma client to git** — Next.js output file tracing does not include `.node` engine binary.
+2. **Commit generated Prisma client to git** and keep `next.config.ts` `outputFileTracingIncludes` pointed at `./app/generated/prisma/**/*` — otherwise the `.node` engine binary may not enter the Vercel function bundle.
 3. **`dotenv` must be in `dependencies`** (not `devDependencies`).
 4. **No `postinstall` script** — generated client is committed directly.
 

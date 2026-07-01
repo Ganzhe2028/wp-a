@@ -85,7 +85,7 @@ npm run dev               # 启动开发服务器 → http://localhost:3000
 ⚠️ Vercel 部署特别注意：
 - `binaryTargets` 必须包含 `"rhel-openssl-3.0.x"`（Vercel 用的是 Amazon Linux，不是 Debian）
 - `dotenv` 必须在 `dependencies` 里（不在 `devDependencies`），否则 Vercel 生产构建时 `prisma.config.ts` 会找不到 `dotenv/config`
-- 生成的 Prisma 客户端（`app/generated/prisma/`）**必须提交到 git**——Next.js 的 output file tracing 不会自动追踪 `.node` 引擎二进制文件
+- 生成的 Prisma 客户端（`app/generated/prisma/`）**必须提交到 git**，且 `next.config.ts` 的 `outputFileTracingIncludes` 必须包含该目录——否则 Vercel function 会找不到 `libquery_engine-rhel-openssl-3.0.x.so.node`
 - 没有 `postinstall` 脚本——提交的生成文件已经包含正确引擎二进制
 
 ## 系统架构
@@ -146,7 +146,7 @@ app/
     favorites/route.ts       # POST 收藏/取消 toggle
     me/favorites/route.ts    # GET 我收藏的人列表
     admin/login/route.ts     # POST 口令登录
-    admin/import/route.ts    # POST 批量导入（生成账号密码）
+    admin/import/route.ts    # POST 批量事务导入（生成账号密码）
     admin/location/route.ts  # POST 编辑位置页
     admin/takedown/route.ts  # POST 下架开关
     admin/export/route.ts    # GET 导出 CSV（含用户名、短码、主页、展位链接）
