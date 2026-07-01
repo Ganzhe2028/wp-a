@@ -165,10 +165,12 @@ wp-a/
 │   └── ImageGrid.tsx               # 多图上传网格（最多 4 张，支持删除）
 │
 ├── lib/                            # 工具库（不动）
-│   ├── auth.ts                     # 学生/管理员 session + 密码哈希（135 行）
+│   ├── auth.ts                     # 学生/管理员 session + 密码哈希
 │   ├── prisma.ts                   # Prisma 客户端单例（防 serverless 冷启动连接耗尽）
 │   ├── r2.ts                       # R2 S3 客户端 + presigned URL 生成
 │   ├── code.ts                     # nanoid 短码 + 可打印密码生成
+│   ├── csv.ts                      # CSV RFC 4180 转义 helper
+│   ├── rate-limit.ts               # 登录限流（内存滑动窗口）
 │   └── qr.ts                       # 二维码生成
 │
 ├── prisma/

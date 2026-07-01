@@ -170,8 +170,9 @@ The same `Person.code` serves both `/u/{code}` (profile) and `/loc/{code}` (loca
 - Image count must be < 4 **and** verified server-side on both upload-url and image-save endpoints.
 
 ### System settings (stored in SystemSetting table, PATCH via `/api/admin/settings`)
-- `allowStudentVisibilityControl` — **defaults to "false"** (disabled). When "true", students see a "主页可见" toggle and can switch between public/private.
-- When "false" (default): all pages public, no toggle. Server silently drops `published` from PATCH body — no 403.
+- `allowStudentVisibilityControl` is **not implemented**. The simplified model auto-publishes a profile when the student uploads an avatar and saves their profile. There is no student-facing "主页可见" toggle.
+- `/api/me` PATCH automatically sets `published = true` when `avatarUrl` is present; the `published` field is ignored if sent by the client.
+- Admin can still hide individual pages via the `hidden` flag (takedown).
 
 ### States ≠ pages
 - `hidden=true` → show "该页面已隐藏" placeholder, not blank screen.
@@ -210,7 +211,8 @@ Production: `https://msoweek.site` (Vercel, auto-deploys from `main` branch).
 Session cookie (`owk_session`) must be set via server `Set-Cookie` header, never via `document.cookie` or localStorage. iOS Safari ITP caps script-set cookies to 7 days, but server-set httpOnly cookies are exempt. The app runs for 10+ days and a single login must survive the full event.
 
 ### Password: plaintext only at generation (2026-06-26)
-Account passwords are 6-char scrypt hashes. The plaintext is returned ONCE during import (`/api/admin/import`) or reset (`/api/admin/reset-password`). Export (`/api/admin/export`) does NOT include passwords. No student self-service password recovery.
+Account passwords are 12-char scrypt hashes using `PRINTABLE_PASSWORD_ALPHABET` (mixed case + digits + safe symbols, excluding visually ambiguous chars). The plaintext is returned ONCE during import (`/api/admin/import`) or reset (`/api/admin/reset-password`). Export (`/api/admin/export`) does NOT include passwords. No student self-service password recovery.
+- Login route has per-IP and per-username rate limiting to slow online brute-force attempts.
 
 ### Favorites: one-way, no reverse reads (2026-06-26)
 `Favorite.favoriteeId` and `Person.favoritesReceived` exist ONLY for cascade delete. Never query "who favorited me" — this is a product hard-decision, not a performance optimization.
@@ -251,3 +253,6 @@ The account system migration (v1.0→v2.0) does NOT affect: R2 presigned URL flo
 
 ### Prisma engine noise on Vercel (2026-06-25)
 - Expected: 4 `PrismaClientInitializationError` on cold start. The 4th path (rhel `.so.node` via `process.cwd()`) succeeds.
+
+### Do NOT set PRISMA_QUERY_ENGINE_LIBRARY on Vercel (2026-07-01)
+- A stale `PRISMA_QUERY_ENGINE_LIBRARY` env var pointing to a non-resolvable path will crash `prisma generate` during the Vercel build with `provided path [...] can't be resolved`. If it exists, remove it from Vercel project settings. The committed generated client in `app/generated/prisma/` plus `binaryTargets = ["native", "rhel-openssl-3.0.x"]` is sufficient.
